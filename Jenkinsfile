@@ -11,10 +11,7 @@ pipeline {
         POSTGRES_PASSWORD     = credentials('mypassword')
         MONGO_INITDB_DATABASE = credentials('my_mongo_database')
         GITHUB_WEBHOOK_SECRET = credentials('webhook_secret_credentials')
-
         DOCKERHUB_CREDENTIALS = credentials('dockerhub_credentials')
-        DOCKER_REGISTRY_URL  = 'https://index.docker.io/v1/'
-        DOCKERHUB_REPO       = "annasever/class_schedule"
     }
 
     triggers {
