@@ -31,7 +31,6 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
                         def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${BUILD_VERSION}")
-                        backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
                     }
                 }
             }
@@ -43,7 +42,6 @@ pipeline {
                     script {
                         dir('frontend') {
                             def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${BUILD_VERSION}")
-                            frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
                         }
                     }
                 }
