@@ -12,6 +12,7 @@ pipeline {
         MONGO_INITDB_DATABASE = credentials('my_mongo_database')
         GITHUB_WEBHOOK_SECRET = credentials('webhook_secret_credentials')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub_credentials')
+        BUILD_VERSION = "${env.BUILD_NUMBER}" // Общая версия для фронтенда и бекенда
     }
 
     triggers {
@@ -25,20 +26,28 @@ pipeline {
             }
         }
 
-        stage('Build Frontend Image') {
+        stage('Build Backend Image') {
             steps {
-                script {
-                    dir('frontend') {
-                        def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}")
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        dir('backend') {
+                            def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${BUILD_VERSION}")
+                            backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
+                        }
                     }
                 }
             }
         }
 
-        stage('Build Backend Image') {
+        stage('Build Frontend Image') {
             steps {
-                script {
-                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}")
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    script {
+                        dir('frontend') {
+                            def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${BUILD_VERSION}")
+                            frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
+                        }
+                    }
                 }
             }
         }
@@ -46,11 +55,17 @@ pipeline {
         stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").push("${env.BUILD_NUMBER}")
-                    docker.image("${DOCKERHUB_REPO}-frontend:latest").push("latest")
+                    if (currentBuild.resultIsBetterOrEqualTo('SUCCESS')) {
+                        echo "Pushing images to DockerHub with version ${BUILD_VERSION}"
 
-                    docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").push("${env.BUILD_NUMBER}")
-                    docker.image("${DOCKERHUB_REPO}-backend:latest").push("latest")
+                        docker.image("${DOCKERHUB_REPO}-backend:${BUILD_VERSION}").push("${BUILD_VERSION}")
+                        docker.image("${DOCKERHUB_REPO}-backend:latest").push("latest")
+
+                        docker.image("${DOCKERHUB_REPO}-frontend:${BUILD_VERSION}").push("${BUILD_VERSION}")
+                        docker.image("${DOCKERHUB_REPO}-frontend:latest").push("latest")
+                    } else {
+                        echo "Skipping push as one or more builds failed"
+                    }
                 }
             }
         }
