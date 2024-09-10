@@ -12,7 +12,7 @@ pipeline {
         MONGO_INITDB_DATABASE = credentials('my_mongo_database')
         GITHUB_WEBHOOK_SECRET = credentials('webhook_secret_credentials')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub_credentials')
-        BUILD_VERSION = "${env.BUILD_NUMBER}" // Общая версия для фронтенда и бекенда
+        BUILD_VERSION = "${env.BUILD_NUMBER}" 
     }
 
     triggers {
@@ -30,10 +30,8 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     script {
-                        dir('backend') {
-                            def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${BUILD_VERSION}")
-                            backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
-                        }
+                        def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${BUILD_VERSION}")
+                        backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
                     }
                 }
             }
