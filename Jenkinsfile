@@ -32,7 +32,8 @@ pipeline {
             steps {
                 script {
                     def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}", "frontend")
-                    frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
+                    // Tag as latest
+                    docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").tag("${DOCKERHUB_REPO}-frontend:latest")
                 }
             }
         }
@@ -40,22 +41,20 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 script {
-                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}")
-                    backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
+                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}", "backend")
+                    // Tag as latest
+                    docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").tag("${DOCKERHUB_REPO}-backend:latest")
                 }
             }
         }
 
-        stage('Push Docker Images') {
+        stage('Push Docker Image') {
             steps {
                 script {
-                    def frontendImage = docker.image("${DOCKERHUB_REPO}-frontend")
-                    frontendImage.push('latest')
-                    frontendImage.push("${env.BUILD_NUMBER}")
-
-                    def backendImage = docker.image("${DOCKERHUB_REPO}-backend")
-                    backendImage.push('latest')
-                    backendImage.push("${env.BUILD_NUMBER}")
+                    docker.withRegistry(DOCKER_REGISTRY_URL, 'DOCKERHUB_CREDENTIALS') {
+                        docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").push('latest')
+                        docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").push('latest')
+                    }
                 }
             }
         }
