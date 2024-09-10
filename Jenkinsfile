@@ -31,8 +31,10 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 script {
-                    def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}", "frontend")
-                    frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
+                    dir('frontend') {
+                        def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}")
+                        frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
+                    }
                 }
             }
         }
@@ -46,12 +48,14 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push to DockerHub') {
             steps {
                 script {
-                        docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").push('latest')
-                        docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").push('latest')
-                    }
+                    docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").push("${env.BUILD_NUMBER}")
+                    docker.image("${DOCKERHUB_REPO}-frontend:latest").push("latest")
+
+                    docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").push("${env.BUILD_NUMBER}")
+                    docker.image("${DOCKERHUB_REPO}-backend:latest").push("latest")
                 }
             }
         }
@@ -84,5 +88,5 @@ pipeline {
             echo 'Build, push, or deployment failed!'
         }
     }
-
+}
 
