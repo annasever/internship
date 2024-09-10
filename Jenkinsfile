@@ -33,7 +33,6 @@ pipeline {
                 script {
                     dir('frontend') {
                         def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}")
-                        frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
                     }
                 }
             }
@@ -42,8 +41,7 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 script {
-                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}", "backend")
-                    backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
+                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}")
                 }
             }
         }
