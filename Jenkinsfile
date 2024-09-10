@@ -31,9 +31,8 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 script {
-                    dir('frontend') {
-                        dockerImage = docker.build("${DOCKERHUB_REPO}-frontend")
-                    }
+                    def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}", "frontend")
+                    frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
                 }
             }
         }
@@ -41,16 +40,22 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${DOCKERHUB_REPO}-backend")
+                    def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}")
+                    backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Docker Images') {
             steps {
                 script {
-                    docker.image("${DOCKERHUB_REPO}-frontend").push('latest')
-                    docker.image("${DOCKERHUB_REPO}-backend").push('latest')
+                    def frontendImage = docker.image("${DOCKERHUB_REPO}-frontend")
+                    frontendImage.push('latest')
+                    frontendImage.push("${env.BUILD_NUMBER}")
+
+                    def backendImage = docker.image("${DOCKERHUB_REPO}-backend")
+                    backendImage.push('latest')
+                    backendImage.push("${env.BUILD_NUMBER}")
                 }
             }
         }
