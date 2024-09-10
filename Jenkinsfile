@@ -13,7 +13,7 @@ pipeline {
         GITHUB_WEBHOOK_SECRET = credentials('webhook_secret_credentials')
 
         DOCKERHUB_CREDENTIALS = credentials('dockerhub_credentials')
-        DOCKER_REGISTRY_URL = 'https://index.docker.io/v1/'
+        DOCKER_REGISTRY_URL  = 'https://index.docker.io/v1/'
         DOCKERHUB_REPO       = "annasever/class_schedule"
     }
 
@@ -32,8 +32,7 @@ pipeline {
             steps {
                 script {
                     def frontendImage = docker.build("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}", "frontend")
-                    // Tag as latest
-                    docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").tag("${DOCKERHUB_REPO}-frontend:latest")
+                    frontendImage.tag("${DOCKERHUB_REPO}-frontend:latest")
                 }
             }
         }
@@ -42,8 +41,7 @@ pipeline {
             steps {
                 script {
                     def backendImage = docker.build("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}", "backend")
-                    // Tag as latest
-                    docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").tag("${DOCKERHUB_REPO}-backend:latest")
+                    backendImage.tag("${DOCKERHUB_REPO}-backend:latest")
                 }
             }
         }
@@ -51,7 +49,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry(DOCKER_REGISTRY_URL, 'DOCKERHUB_CREDENTIALS') {
                         docker.image("${DOCKERHUB_REPO}-frontend:${env.BUILD_NUMBER}").push('latest')
                         docker.image("${DOCKERHUB_REPO}-backend:${env.BUILD_NUMBER}").push('latest')
                     }
