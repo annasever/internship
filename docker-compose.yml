@@ -14,21 +14,17 @@ services:
       - postgres
       - mongo
       - redis
-#    env_file:
-#      - .env
 
   frontend:
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile 
+      context: ./frontend
+      dockerfile: Dockerfile 
     image: annasever/class_schedule/frontend:latest
     container_name: frontend
     ports:
       - "3000:3000"
     depends_on:
       - backend
-#    env_file:
-#      - .env 
         
   postgres:
     image: postgres:latest
