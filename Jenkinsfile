@@ -84,5 +84,5 @@ pipeline {
             echo 'Build, push, or deployment failed!'
         }
     }
-}
+
 
