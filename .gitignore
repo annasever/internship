@@ -14,4 +14,4 @@ aws-tf/*.tfstate
 aws-tf/*.tfstate.*
 aws-tf/*.tfvars
 aws-tf/*.tfstate.lock.hcl
-
+aws-tf/terraform.tfvars
