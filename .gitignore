@@ -6,3 +6,8 @@
 /src/test/resources/hibernatetest.properties
 /schedule_logs
 .env
+/terraform_project/*.tfstate
+/terraform_project/*.tfstate.*
+/terraform_project/.terraform/
+/terraform_project/*.tfvars
+/terraform_project/terraform.tfvars
