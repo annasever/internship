@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/SCRUM-7.TF_Ansible_Jenkins']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkins-git-user', url: 'git@github.com:annasever/internship.git']])
+                checkout scm
+            }
+        }
+
+        stage('Initialize Terraform') {
+            steps {
+                script {
+                    dir('terraform_project') {
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+
+        stage('Plan Terraform') {
+            steps {
+                script {
+                    dir('terraform_project') {
+                        sh 'terraform plan'
+                    }
+                }
+            }
+        }
+
+        stage('Apply Terraform') {
+            steps {
+                script {
+                    dir('terraform_project') {
+                        sh 'terraform apply -auto-approve | tee terraform_apply_output.txt'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+             script {
+                dir('terraform_project') {
+                    echo 'Terraform Plan Output:'
+                    sh 'cat terraform_plan_output.txt'
+                    
+                    echo 'Terraform Apply Output:'
+                    sh 'cat terraform_apply_output.txt'
+                }
+            }
+        }
+    }
+}
