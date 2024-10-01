@@ -59,3 +59,15 @@ variable "docdb_password" {
 variable "subnet_ids" {
   type = list(string)
 }
+
+# variables.tf
+variable "repo_user" {
+  description = "GitHub username"
+  type        = string
+}
+
+variable "repo_token" {
+  description = "GitHub token"
+  type        = string
+  sensitive   = true  
+}
