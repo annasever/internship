@@ -6,3 +6,12 @@
 /src/test/resources/hibernatetest.properties
 /schedule_logs
 .env
+
+
+# Terraform files in aws-tf
+aws-tf/.terraform/
+aws-tf/*.tfstate
+aws-tf/*.tfstate.*
+aws-tf/*.tfvars
+aws-tf/*.tfstate.lock.hcl
+
