@@ -53,11 +53,11 @@ pipeline {
         always {
              script {
                 dir('terraform_project') {
-                    echo 'Terraform Plan Output:'
-                    sh 'cat terraform_plan_output.txt'
+//                    echo 'Terraform Plan Output:'
+//                    sh ' terraform_plan_output.txt'
                     
-                    echo 'Terraform Apply Output:'
-                    sh 'cat terraform_apply_output.txt'
+                   echo 'Terraform Apply Output:'
+//                    sh 'cat terraform_apply_output.txt'
                 }
             }
         }
