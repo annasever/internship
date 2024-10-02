@@ -39,7 +39,7 @@ resource "null_resource" "install_backend_dependencies" {
 
 resource "null_resource" "install_frontend_dependencies" {
   depends_on = [aws_instance.frontend]
-
+  
   connection {
     type        = "ssh"
     user        = "ubuntu"
