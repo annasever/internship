@@ -64,8 +64,9 @@ pipeline {
                 dir('terraform_project') {                   
                    echo 'Terraform Apply Output saved in terraform_apply_output.txt'
                     sh 'cat terraform_apply_output.txt'
-                }
-            }
-        }
-    }
+                   }
+               }
+           }
+       }
+   }
 }
