@@ -7,6 +7,10 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
 
+    tools {
+        terraform 'terraform'
+    }
+
     stages {
         stage('Checkout') {
             steps {
