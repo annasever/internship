@@ -22,10 +22,12 @@ variable "ssh_key_name" {
 variable "vpc_id" {
   type        = string
   description = "The ID of the VPC where the security group will be created"
+  default = "vpc-09a018f189c40d391"
 }
 
 variable "aws_account_id" {
   type = string
+  default = "209479303291"
 }
 
 variable "aws_access_key_id" {
