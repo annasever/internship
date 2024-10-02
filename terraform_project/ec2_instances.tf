@@ -26,36 +26,14 @@ resource "aws_instance" "frontend" {
   }
 }
 
-resource "aws_instance" "postgres" {
+resource "aws_instance" "databases" {
   ami                    = var.instance_AMI
   instance_type          = var.instance_type
   key_name               = var.ssh_key_name
   vpc_security_group_ids = [aws_security_group.servers_sg.id]
 
   tags = {
-    Name = "postgres"
-  }
-}
-
-resource "aws_instance" "mongo" {
-  ami                    = var.instance_AMI
-  instance_type          = var.instance_type
-  key_name               = var.ssh_key_name
-  vpc_security_group_ids = [aws_security_group.servers_sg.id]
-
-  tags = {
-    Name = "mongo"
-  }
-}
-
-resource "aws_instance" "redis" {
-  ami                    = var.instance_AMI
-  instance_type          = var.instance_type
-  key_name               = var.ssh_key_name
-  vpc_security_group_ids = [aws_security_group.servers_sg.id]
-
-  tags = {
-    Name = "redis"
+    Name = "databases"
   }
 }
 
@@ -82,35 +60,13 @@ resource "null_resource" "install_frontend_dependencies" {
   }
 }
 
-resource "null_resource" "install_postgres_dependencies" {
-  depends_on = [aws_instance.postgres]
+resource "null_resource" "install_databases_dependencies" {
+  depends_on = [aws_instance.databases]
 
   connection {
     type        = "ssh"
     user        = "ubuntu"
     private_key = file("~/.ssh/vasilenko.pem")
-    host        = aws_instance.postgres.public_ip
-  }
-}
-
-resource "null_resource" "install_mongo_dependencies" {
-  depends_on = [aws_instance.mongo]
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("~/.ssh/vasilenko.pem")
-    host        = aws_instance.mongo.public_ip
-  }
-}
-
-resource "null_resource" "install_redis_dependencies" {
-  depends_on = [aws_instance.redis]
-
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("~/.ssh/vasilenko.pem")
-    host        = aws_instance.redis.public_ip
+    host        = aws_instance.databases.public_ip
   }
 }
