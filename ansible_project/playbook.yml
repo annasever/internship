@@ -1,0 +1,18 @@
+---
+- hosts: tag_Name_backend
+  become: true
+  remote_user: ubuntu 
+  roles:
+    - backend
+
+- hosts: tag_Name_frontend
+  become: true
+  remote_user: ubuntu
+  roles:
+    - frontend
+
+- hosts: tag_Name_databases
+  become: true
+  remote_user: ubuntu
+  roles:
+    - databases

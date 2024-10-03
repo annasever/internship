@@ -1,0 +1,270 @@
+---
+- name: Include database variables
+  include_vars: vars/vars.yml
+
+- name: 1. Install packages
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - libpq-dev
+      - python3-psycopg2
+    state: present
+
+- name: 2. Check if PostgreSQL is initialized
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/pg_hba.conf"
+  register: postgres_data
+
+- name: 4. Start and enable service
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+    enabled: yes
+
+- name: Check for initdb command
+  command: which initdb
+  register: initdb_check
+  ignore_errors: true # Optional: To prevent playbook failure if initdb is not found
+
+- name: Debug initdb path
+  debug:
+    msg: "initdb found at: {{ initdb_check.stdout }}"
+  when: initdb_check.rc == 0
+
+- name: Inform if initdb is not found
+  debug:
+    msg: "initdb command not found."
+  when: initdb_check.rc != 0
+
+- name: 3.Initialize postgres
+  ansible.builtin.shell: "{{ postgresql_bin_path }}/initbd -D {{ postgresql_data_dir }}"
+  become: true
+  become_user: "{{ postgres_user  }}"
+  when: not postgres_data.stat.exists
+
+- name: 4. Start and enable service
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+    enabled: yes
+# - name: 6. Set password for postgres user using ALTER USER
+#   become: true
+#   become_user: postgres
+#   command: psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+#   when: postgres_data.stat.exists is defined and postgres_data.stat.exists
+#   register: password_change_result
+#   ignore_errors: true
+
+# - name: Debug password change result
+#   debug:
+#     var: password_change_result
+
+# - name: 7. Ensure correct version of PostgreSQL cluster is initialized
+#   command: pg_lsclusters
+#   register: pg_clusters
+#   ignore_errors: true
+
+# - name: 8. Clear the pg_hba.conf file
+#   lineinfile:
+#     path: /etc/postgresql/14/main/pg_hba.conf
+#     state: absent
+#     regexp: ".*"
+
+# - name: 9. Configure pg_hba.conf for password authentication
+#   blockinfile:
+#     path: /etc/postgresql/14/main/pg_hba.conf
+#     block: |
+#       # TYPE  DATABASE        USER            ADDRESS                 METHOD
+#       local   all             postgres        md5
+#       local   all             all             md5
+#       local   replication     all             peer
+#       host    all             all             0.0.0.0/0               md5
+#       host    all             all             127.0.0.1/32            scram-sha-256
+#       host    all             all             ::1/128                  scram-sha-256
+#   notify: Restart PostgreSQL
+#   become: true
+
+# - name: 10. Reload PostgreSQL to apply changes
+#   service:
+#     name: postgresql
+#     state: reloaded
+#   become: true
+
+# - name: 11. Set password for postgres user
+#   postgresql_user:
+#     name: postgres
+#     password: "{{ postgres_password }}"
+#     login_user: postgres
+#     login_password: "{{ postgres_password }}"
+#     login_host: localhost
+#   become: true
+
+# - name: 12. Create application database
+#   postgresql_db:
+#     name: "{{ postgres_db }}"
+#     state: present
+#     owner: postgres
+#   become: true
+
+# - name: 13. Create application PostgreSQL user
+#   postgresql_user:
+#     name: "{{ postgres_user }}"
+#     password: "{{ postgres_password }}"
+#     state: present
+#     login_user: postgres
+#     login_password: "{{ postgres_password }}"
+#     priv: "{{ postgres_db }}:ALL"
+#   become: true
+
+# - name: 14. Copy database restore script to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/pgsql_restore.sh"
+#     dest: /usr/local/bin/pgsql_restore.sh
+#     mode: "0755"
+#   become: true
+
+# - name: 15. Copy database dump to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/2024-08-19.dump"
+#     dest: /tmp/2024-08-19.dump
+#     mode: "0644"
+#   become: true
+
+# - name: 16. Restore database from dump file
+#   command: /usr/local/bin/pgsql_restore.sh /tmp/2024-08-19.dump
+#   become: true
+
+# - name: 17. Restart PostgreSQL
+#   service:
+#     name: postgresql
+#     state: restarted
+#   become: true
+
+# ---
+# - name: Include database variables
+#   include_vars: vars/vars.yml
+
+# - name: 1. Update apt repository
+#   apt:
+#     update_cache: yes
+
+# - name: 2. Install ACL
+#   apt:
+#     name:
+#       - acl
+#     state: present
+
+# - name: 3. Install necessary packages
+#   apt:
+#     name: "{{ item }}"
+#     state: present
+#   loop:
+#     - postgresql
+#     - postgresql-client
+
+# - name: 4. Install Python packages
+#   pip:
+#     name: "{{ item }}"
+#     state: present
+#   loop:
+#     - psycopg2-binary
+
+# - name: 5. Ensure PostgreSQL service is running
+#   service:
+#     name: postgresql
+#     state: started
+#     enabled: yes
+
+# - name: 6. Set password for postgres user using ALTER USER
+#   become: true
+#   become_user: postgres
+#   command: psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+#   when: postgres_data.stat.exists is defined and postgres_data.stat.exists
+#   register: password_change_result
+#   ignore_errors: true
+
+# - name: Debug password change result
+#   debug:
+#     var: password_change_result
+
+# - name: 7. Ensure correct version of PostgreSQL cluster is initialized
+#   command: pg_lsclusters
+#   register: pg_clusters
+#   ignore_errors: true
+
+# - name: 8. Clear the pg_hba.conf file
+#   lineinfile:
+#     path: /etc/postgresql/14/main/pg_hba.conf
+#     state: absent
+#     regexp: ".*"
+
+# - name: 9. Configure pg_hba.conf for password authentication
+#   blockinfile:
+#     path: /etc/postgresql/14/main/pg_hba.conf
+#     block: |
+#       # TYPE  DATABASE        USER            ADDRESS                 METHOD
+#       local   all             postgres        md5
+#       local   all             all             md5
+#       local   replication     all             peer
+#       host    all             all             0.0.0.0/0               md5
+#       host    all             all             127.0.0.1/32            scram-sha-256
+#       host    all             all             ::1/128                  scram-sha-256
+#   notify: Restart PostgreSQL
+#   become: true
+
+# - name: 10. Reload PostgreSQL to apply changes
+#   service:
+#     name: postgresql
+#     state: reloaded
+#   become: true
+
+# - name: 11. Set password for postgres user
+#   postgresql_user:
+#     name: postgres
+#     password: "{{ postgres_password }}"
+#     login_user: postgres
+#     login_password: "{{ postgres_password }}"
+#     login_host: localhost
+#   become: true
+
+# - name: 12. Create application database
+#   postgresql_db:
+#     name: "{{ postgres_db }}"
+#     state: present
+#     owner: postgres
+#   become: true
+
+# - name: 13. Create application PostgreSQL user
+#   postgresql_user:
+#     name: "{{ postgres_user }}"
+#     password: "{{ postgres_password }}"
+#     state: present
+#     login_user: postgres
+#     login_password: "{{ postgres_password }}"
+#     priv: "{{ postgres_db }}:ALL"
+#   become: true
+
+# - name: 14. Copy database restore script to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/pgsql_restore.sh"
+#     dest: /usr/local/bin/pgsql_restore.sh
+#     mode: "0755"
+#   become: true
+
+# - name: 15. Copy database dump to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/2024-08-19.dump"
+#     dest: /tmp/2024-08-19.dump
+#     mode: "0644"
+#   become: true
+
+# - name: 16. Restore database from dump file
+#   command: /usr/local/bin/pgsql_restore.sh /tmp/2024-08-19.dump
+#   become: true
+
+# - name: 17. Restart PostgreSQL
+#   service:
+#     name: postgresql
+#     state: restarted
+#   become: true

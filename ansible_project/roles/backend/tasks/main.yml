@@ -1,0 +1,30 @@
+---
+- name: 1. Install Java JDK 11
+  apt:
+    name: openjdk-11-jdk
+    state: present
+
+- name: 2. Install Tomcat 9
+  apt:
+    name: tomcat9
+    state: present
+
+- name: 3. Create directory for application
+  file:
+    path: /usr/local/tomcat/webapps
+    state: directory
+    owner: tomcat
+    group: tomcat
+
+- name: 4. Copy WAR file to Tomcat
+  copy:
+    src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
+    dest: /usr/local/tomcat/webapps/ROOT.war
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+
+- name: 5. Restart Tomcat to update the application
+  service:
+    name: tomcat9
+    state: restarted
