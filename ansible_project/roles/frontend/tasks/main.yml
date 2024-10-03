@@ -1,0 +1,30 @@
+---
+- name: 1. Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: 2. Remove default nginx configuration
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: 3. Deploy Nginx configuration
+  template:
+    src: "/home/ubuntu/internship_project/ansible_project/roles/frontend/templates/class_schedule.j2"
+    dest: /etc/nginx/sites-available/class_schedule
+
+- name: 4. Enable the Nginx site
+  command: nginx -s reload
+
+- name: 5. Create symbolic link to enable site
+  file:
+    src: /etc/nginx/sites-available/class_schedule
+    dest: /etc/nginx/sites-enabled/class_schedule
+    state: link
+
+- name: 6. Restart Nginx service
+  service:
+    name: nginx
+    state: restarted
