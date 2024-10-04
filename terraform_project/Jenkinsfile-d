@@ -27,30 +27,30 @@ pipeline {
             }
         }
 
-        stage('Plan Terraform') {
+        stage('Plan Terraform Destroy') {
             steps {
                 script {
                     dir('terraform_project') {
                         sh """
-                    terraform plan \
+                    terraform plan -destroy \
                     -var aws_access_key_id=${AWS_ACCESS_KEY_ID} \
                     -var aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-                    > terraform_plan_output.txt
+                    > terraform_destroy_plan_output.txt
                     """
                     }
                 }
             }
         }
 
-        stage('Apply Terraform') {
+        stage('Destroy Terraform Infrastructure') {
             steps {
                 script {
                     dir('terraform_project') {
                         sh """
-                    terraform apply -auto-approve \
+                    terraform destroy -auto-approve \
                     -var aws_access_key_id=${AWS_ACCESS_KEY_ID} \
                     -var aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
-                    > terraform_apply_output.txt
+                    > terraform_destroy_output.txt
                     """
                     }
                 }
@@ -62,8 +62,8 @@ pipeline {
         always {
             script {
                 dir('terraform_project') {                   
-                    echo 'Terraform Apply Output saved in terraform_apply_output.txt'
-                    sh 'cat terraform_apply_output.txt'
+                    echo 'Terraform Destroy Output saved in terraform_destroy_output.txt'
+                    sh 'cat terraform_destroy_output.txt'
                 }
             }
         }

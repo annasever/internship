@@ -36,4 +36,25 @@ resource "aws_security_group" "servers_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port   = 5432 # PostgreSQL
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["3.68.108.87/32"]
+  }
+
+  ingress {
+    from_port   = 27017 # MongoDB
+    to_port     = 27017
+    protocol    = "tcp"
+    cidr_blocks = ["3.68.108.87/32"]
+  }
+
+  ingress {
+    from_port   = 6379 # Redis
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = ["3.68.108.87/32"]
+  }
 }
