@@ -11,8 +11,28 @@
   roles:
     - frontend
 
+
 - hosts: tag_Name_databases
   become: true
   remote_user: ubuntu
   roles:
-    - databases
+    - postgres
+
+
+- hosts: tag_Name_databases
+  become: true
+  remote_user: ubuntu
+  roles:
+    - redis
+  
+- hosts: tag_Name_databases
+  become: true
+  remote_user: ubuntu
+  roles:
+    - mongo
+
+# - hosts: tag_Name_databases
+#   become: true
+#   remote_user: ubuntu
+#   roles:
+#     - postgres
