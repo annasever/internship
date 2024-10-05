@@ -1,4 +1,8 @@
 ---
+- name: 1. Update apt cache
+  apt:
+    update_cache: yes
+
 - name: 1. Install Java JDK 11
   apt:
     name: openjdk-11-jdk
@@ -16,15 +20,17 @@
     owner: tomcat
     group: tomcat
 
-- name: 4. Copy WAR file to Tomcat
+- name: 4. Ensure that Tomcat is started
+  service:
+    name: tomcat9
+    state: started
+    enabled: true
+
+- name: 5. Copy WAR file to Tomcat
   copy:
     src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
     dest: /usr/local/tomcat/webapps/ROOT.war
     owner: tomcat
     group: tomcat
     mode: '0644'
-
-- name: 5. Restart Tomcat to update the application
-  service:
-    name: tomcat9
-    state: restarted
+  notify: Restart Tomcat

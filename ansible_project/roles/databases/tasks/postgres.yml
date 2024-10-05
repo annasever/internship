@@ -1,53 +1,173 @@
 ---
-- name: Include database variables
-  include_vars: vars/vars.yml
+# - name: Include database variables
+#   include_vars: vars/vars.yml
+# - name: 1. Install packages
+#   ansible.builtin.apt:
+#     name:
+#       - postgresql
+#       - postgresql-contrib
+#       - libpq-dev
+#       - python3-psycopg2
+#     state: present
 
-- name: 1. Install packages
-  ansible.builtin.apt:
-    name:
-      - postgresql
-      - postgresql-contrib
-      - libpq-dev
-      - python3-psycopg2
-    state: present
+# - name: 2. Check if PostgreSQL is initialized
+#   ansible.builtin.stat:
+#     path: "{{ postgresql_data_dir }}/pg_hba.conf"
+#   register: postgres_data
 
-- name: 2. Check if PostgreSQL is initialized
-  ansible.builtin.stat:
-    path: "{{ postgresql_data_dir }}/pg_hba.conf"
-  register: postgres_data
+# - name: 3. REStart service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: restarted
+#     enabled: yes
 
-- name: 4. Start and enable service
-  ansible.builtin.service:
-    name: postgresql
-    state: restarted
-    enabled: yes
+# - name: 4.Initialize postgres
+#   ansible.builtin.shell: "{{ postgresql_bin_path }}/initbd -D {{ postgresql_data_dir }}"
+#   become: true
+#   become_user: "{{ postgres_user  }}"
+#   when: not postgres_data.stat.exists
 
-- name: Check for initdb command
-  command: which initdb
-  register: initdb_check
-  ignore_errors: true # Optional: To prevent playbook failure if initdb is not found
+# - name: 5. Set permissions on PostgreSQL data directory
+#   ansible.builtin.file:
+#     path: "{{ postgresql_data_dir }}"
+#     owner: "{{ postgres_user }}"
+#     group: "{{ postgres_user }}"
+#     mode: "0700"
+#   become: true
 
-- name: Debug initdb path
-  debug:
-    msg: "initdb found at: {{ initdb_check.stdout }}"
-  when: initdb_check.rc == 0
+# - name: 6. Start and enable service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: started
+#     enabled: yes
 
-- name: Inform if initdb is not found
-  debug:
-    msg: "initdb command not found."
-  when: initdb_check.rc != 0
+# - name: 7. Set password for postgres user using ALTER USER
+#   become: true
+#   become_user: postgres
+#   command: psql -U postgres -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+#   args:
+#     executable: /bin/bash
+#   environment:
+#     PGPASSWORD: "{{ postgres_password }}"
+#   when: postgres_data.stat.exists
+#   register: password_change_result
 
-- name: 3.Initialize postgres
-  ansible.builtin.shell: "{{ postgresql_bin_path }}/initbd -D {{ postgresql_data_dir }}"
-  become: true
-  become_user: "{{ postgres_user  }}"
-  when: not postgres_data.stat.exists
+# - name: 8. Ensure md5 authentication for postgres user
+#   ansible.builtin.lineinfile:
+#     path: "{{ postgresql_dir }}/pg_hba.conf"
+#     line: "local    all             postgres                            md5 "
+#     state: present
+#   become: true
 
-- name: 4. Start and enable service
-  ansible.builtin.service:
-    name: postgresql
-    state: restarted
-    enabled: yes
+# - name: 9. Set database password environment variables
+#   ansible.builtin.shell: "export PGPASSWORD= {{ postgres_password }}"
+#   args:
+#     executable: /bin/bash
+
+# - name: Set database password environment variable
+#   ansible.builtin.shell: "export PGPASSWORD={{ postgres_password }}"
+#   args:
+#     executable: /bin/bash
+
+# - name: 10 Drop and recreate public schema
+#   ansible.builtin.shell: |
+#     PGPASSWORD={{ postgres_password }} psql -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+#   args:
+#     executable: /bin/bash
+
+# - name: Drop and recreate public schema
+#   ansible.builtin.shell: |
+#     psql -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+#   environment:
+#     PGPASSWORD: "{{ postgres_password }}"
+#   args:
+#     executable: /bin/bash
+
+# - name: 14. Copy database restore script to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/pgsql_restore.sh"
+#     dest: /usr/local/bin/pgsql_restore.sh
+#     mode: "0755"
+#   become: true
+
+# - name: Copy dump file to to the server
+#   copy:
+#     src: "{{ playbook_dir }}/files/2024-08-19.dump"
+#     dest: /tmp/2024-08-19.dump
+#     owner: "{{ postgres_user }}"
+#     mode: "0755"
+
+# - name: Restore database from dump file
+#   ansible.builtin.shell: |
+#     psql --set ON_ERROR_STOP=off -U {{ postgres_user }} -h {{ postgres_host }} -p {{ postgres_port }} -d {{ postgres_db }} -1 -f /tmp/2024-08-19.dump {{ db_backup_filename }}
+#   environment:
+#     PGPASSWORD: "{{ postgres_password }}"
+#   args:
+#     executable: /bin/bash
+
+# - name: Unset database password environment variable
+#   ansible.builtin.shell: "unset PGPASSWORD"
+#   args:
+#     executable: /bin/bash
+
+# - name: 16. Restore database from dump file
+#   command: /usr/local/bin/pgsql_restore.sh /tmp/2024-08-19.dump
+#   become: true
+# - name: Drop the postgres user (if exists)
+#   become: true
+#   become_user: postgres
+#   postgresql_user:
+#     name: postgres
+#     state: absent
+#   ignore_errors: true
+
+# - name: Create postgres user with password
+#   become: true
+#   become_user: postgres
+#   postgresql_user:
+#     name: postgres
+#     password: "{{ postgres_password }}"
+#     state: present
+#     role_attr_flags: "SUPERUSER"
+
+# - name: 2. Check if PostgreSQL is initialized
+#   ansible.builtin.stat:
+#     path: "{{ postgresql_data_dir }}/pg_hba.conf"
+#   register: postgres_data
+
+# - name: 4. Start and enable service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: restarted
+#     enabled: yes
+
+# - name: Check for initdb command
+#   command: which initdb
+#   register: initdb_check
+#   ignore_errors: true # Optional: To prevent playbook failure if initdb is not found
+
+# - name: Debug initdb path
+#   debug:
+#     msg: "initdb found at: {{ initdb_check.stdout }}"
+#   when: initdb_check.rc == 0
+
+# - name: Inform if initdb is not found
+#   debug:
+#     msg: "initdb command not found."
+#   when: initdb_check.rc != 0
+
+# - name: 3.Initialize postgres
+#   ansible.builtin.shell: "{{ postgresql_bin_path }}/initbd -D {{ postgresql_data_dir }}"
+#   become: true
+#   become_user: "{{ postgres_user  }}"
+#   when: not postgres_data.stat.exists
+
+# - name: 4. Start and enable service
+#   ansible.builtin.service:
+#     name: postgresql
+#     state: restarted
+#     enabled: yes
+
 # - name: 6. Set password for postgres user using ALTER USER
 #   become: true
 #   become_user: postgres
