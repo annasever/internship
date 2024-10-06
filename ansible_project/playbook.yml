@@ -1,23 +1,10 @@
 ---
-- hosts: tag_Name_backend
-  become: true
-  remote_user: ubuntu 
-  roles:
-    - backend
-
-- hosts: tag_Name_frontend
-  become: true
-  remote_user: ubuntu
-  roles:
-    - frontend
-
 
 - hosts: tag_Name_databases
   become: true
   remote_user: ubuntu
   roles:
     - postgres
-
 
 - hosts: tag_Name_databases
   become: true
@@ -31,8 +18,16 @@
   roles:
     - mongo
 
-# - hosts: tag_Name_databases
-#   become: true
-#   remote_user: ubuntu
-#   roles:
-#     - postgres
+- hosts: tag_Name_backend
+  become: true
+  remote_user: ubuntu 
+  roles:
+    - backend
+
+- hosts: tag_Name_frontend
+  become: true
+  remote_user: ubuntu
+  vars:
+    backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
+  roles:
+    - frontend

@@ -8,13 +8,8 @@ __postgresql_packages:
   - postgresql
   - postgresql-contrib
   - libpq-dev
-# postgresql_python_library: python3-psycopg2
 
-# postgresql_database: my_database
 db_backup_filename: "2024-08-19.dump"
-# postgresql_password: password
-# postgresql_data_dir1: "/var/lib/postgresql/data"
-
 postgresql_user: "postgres"
 postgresql_group: "postgres"
 postgresql_password: "password" # Consider using Ansible Vault for sensitive data

@@ -1,26 +1,26 @@
 ---
+- name: Include vars.yml
+  include_vars: vars/vars.yml
+  
 - name: 1. Update apt cache
   apt:
     update_cache: yes
 
-- name: 1. Install Nginx
+- name: 2. Install Nginx
   apt:
     name: nginx
     state: present
     update_cache: yes
 
-- name: 2. Remove default nginx configuration
+- name: 3. Remove default nginx configuration
   file:
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: 3. Deploy Nginx configuration
+- name: 4. Deploy Nginx configuration
   template:
     src: "/home/ubuntu/internship_project/ansible_project/roles/frontend/templates/class_schedule.j2"
     dest: /etc/nginx/sites-available/class_schedule
-
-- name: 4. Enable the Nginx site
-  command: nginx -s reload
 
 - name: 5. Create symbolic link to enable site
   file:
@@ -32,3 +32,13 @@
   service:
     name: nginx
     state: restarted
+
+- name: 7. Copy files to frontend directory
+  copy:
+    src: "/home/ubuntu/internship/frontend/"
+    dest: /var/www/frontend/
+
+- name: 8. Add file .env
+  template:
+      src: "/home/ubuntu/internship/ansible_project/roles/frontend/templates/.env.j2"
+      dest: /var/www/frontend/.env

@@ -1,0 +1,4 @@
+---
+#REACT_APP_API_BASE_URL: "http://{{ hostvars['tag_Name_backend'].ansible_host }}:8080"
+backend_ip: "{{ hostvars['tag_Name_backend'].ansible_host }}"
+frontend_ip: "{{ hostvars['tag_Name_frontend'].ansible_host }}"

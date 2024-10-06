@@ -1,36 +1,68 @@
 ---
+- name: Include vars.yml
+  include_vars: vars/vars.yml
+  
 - name: 1. Update apt cache
   apt:
     update_cache: yes
 
-- name: 1. Install Java JDK 11
+- name: 2. Install Java JDK 11
   apt:
     name: openjdk-11-jdk
     state: present
 
-- name: 2. Install Tomcat 9
+- name: 3. Install Tomcat 9
   apt:
     name: tomcat9
     state: present
 
-- name: 3. Create directory for application
+- name: 4. Create directory for application
   file:
-    path: /usr/local/tomcat/webapps
+    path: /var/lib/tomcat9/webapps
     state: directory
     owner: tomcat
     group: tomcat
 
-- name: 4. Ensure that Tomcat is started
+- name: 5. Ensure that Tomcat is started
   service:
     name: tomcat9
     state: started
     enabled: true
 
-- name: 5. Copy WAR file to Tomcat
+- name: 6. Copy WAR file to Tomcat
   copy:
     src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
-    dest: /usr/local/tomcat/webapps/ROOT.war
+    dest: /var/lib/tomcat9/webapps/ROOT.war
     owner: tomcat
     group: tomcat
     mode: '0644'
   notify: Restart Tomcat
+
+- name: 7. Copy .env file to Tomcat
+  copy:
+    src: "{{ playbook_dir }}/roles/backend/templates/.env.j2"
+    dest: /var/lib/tomcat9/.env
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+
+- name: 8. Create script to load environment variables
+  copy:
+    content: |
+      #!/bin/bash
+      set -a
+      source /var/lib/tomcat9/.env
+      set +a
+    dest: /usr/share/tomcat9/bin/setenv.sh
+    owner: tomcat
+    group: tomcat
+    mode: '0755'
+
+- name: 9. Ensure setenv.sh is executable and used by Tomcat
+  file:
+    path: /usr/share/tomcat9/bin/setenv.sh
+    state: file
+    owner: tomcat
+    group: tomcat
+    mode: '0755'
+  notify: Restart Tomcat 
