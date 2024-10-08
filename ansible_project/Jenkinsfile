@@ -17,8 +17,9 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     withCredentials([string(credentialsId: 'vault_password', variable: 'VAULT_PASS')]) {
+                        writeFile file: 'vault_password.txt', text: "${VAULT_PASS}"
                         sh '''
-                            ansible-playbook playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")
+                            ansible-playbook playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt
                         '''
                     }
                 }
@@ -54,7 +55,7 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     script {
-                        sh " ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")"
+                        sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
                     }
                 }
             }
