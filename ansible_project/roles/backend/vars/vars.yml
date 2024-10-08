@@ -6,6 +6,7 @@ postgres_port: 5432
 
 mongo_initdb_database: "schedules"
 redis_port: 6379
+mongo_port: 27017
 
 SPRING_PROFILES_ACTIVE: prod
 DATABASE_URL: jdbc:postgresql://"{{ hostvars['tag_Name_databases'].ansible_host }}":5432/mydatabase
