@@ -42,29 +42,30 @@ pipeline {
             }
         }
 
-    //     stage('Update Frontend .env Configuration') {
-    //         steps {
-    //             dir('ansible_project') {
-    //                 script {
-    //                     def backendIp = readFile('backend_ip.txt').trim()
-    //                          sh """
-    //                             echo 'REACT_APP_API_BASE_URL="http://${backendIp}:8080"'  | sudo tee /var/www/frontend/.env > /dev/null
-    //                         """
-    //                     }
-    //                 }
-    //             }
-    //         }
+        // stage('Update Frontend .env Configuration') {
+        //     steps {
+        //         dir('ansible_project') {
+        //             script {
+        //                 def backendIp = readFile('backend_ip.txt').trim()
+        //                 sh """
+        //                     echo 'REACT_APP_API_BASE_URL="http://${backendIp}:8080"' | sudo tee /var/www/frontend/.env > /dev/null
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
 
-    //     stage('Deploy Frontend') {
-    //         steps {
-    //             dir('ansible_project') {
-    //                 script {
-    //                     sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+        // stage('Deploy Frontend') {
+        //     steps {
+        //         dir('ansible_project') {
+        //             script {
+        //                 sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
 
     post {
         success {
@@ -74,5 +75,4 @@ pipeline {
             echo 'Ansible playbook execution failed.'
         }
     }
-}
 }
