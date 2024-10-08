@@ -47,9 +47,7 @@ pipeline {
                 dir('ansible_project') {
                     script {
                         def backendIp = readFile('backend_ip.txt').trim()
-                        sh """
-                            sed -i 's|^REACT_APP_API_BASE_URL=.*|REACT_APP_API_BASE_URL="http://${backendIp}:8080"|' /var/www/frontend/.env
-                        """
+                        echo "REACT_APP_API_BASE_URL=\"http://${backendIp}:8080\"" > /var/www/frontend/.env
                     }
                 }
             }
