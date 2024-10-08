@@ -1,0 +1,5 @@
+- hosts: tag_Name_databases
+  become: true
+  remote_user: ubuntu
+  roles:
+    - mongo

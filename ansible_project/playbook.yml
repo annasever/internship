@@ -28,6 +28,6 @@
   become: true
   remote_user: ubuntu
   vars:
-    backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
+    backend_ip: "{{ hostvars['tag_Name_backend'].ansible_host }}"
   roles:
     - frontend

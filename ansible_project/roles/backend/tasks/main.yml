@@ -32,8 +32,7 @@
 - name: 6. Copy WAR file to Tomcat
   copy:
     src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
-    dest: /var/lib/tomcat9/webapps/ROOT.war
-    owner: tomcat
+    dest: /var/lib/tomcat9/webapps/
     group: tomcat
     mode: '0644'
   notify: Restart Tomcat
@@ -45,8 +44,17 @@
     owner: tomcat
     group: tomcat
     mode: '0644'
+  notify: Restart Tomcat
 
-- name: 8. Create script to load environment variables
+- name: 8. Generate .env file using template
+  template:
+    src: "roles/backend/templates/.env.j2"
+    dest: /var/lib/tomcat9/.env
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+
+- name: 9. Create script to load environment variables
   copy:
     content: |
       #!/bin/bash
@@ -58,7 +66,7 @@
     group: tomcat
     mode: '0755'
 
-- name: 9. Ensure setenv.sh is executable and used by Tomcat
+- name: 10. Ensure setenv.sh is executable and used by Tomcat
   file:
     path: /usr/share/tomcat9/bin/setenv.sh
     state: file

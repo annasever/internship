@@ -1,0 +1,8 @@
+---
+- hosts: tag_Name_frontend
+  become: true
+  remote_user: ubuntu
+  vars:
+    backend_ip: "{{ hostvars['tag_Name_backend'].ansible_host }}"
+  roles:
+    - frontend
