@@ -103,7 +103,8 @@
 - name: 18. Enable authentication in MongoDB
   lineinfile:
     path: /etc/mongod.conf
-    line: "security:\n  authorization: enabled"
+    regexp: "^\\s*authorization:\\s*enabled"
+    line: " authorization: enabled"
     insertafter: "^#security:"
     state: present
     backup: yes

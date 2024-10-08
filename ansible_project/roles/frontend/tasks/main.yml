@@ -1,7 +1,7 @@
 ---
 - name: Include vars.yml
   include_vars: vars/vars.yml
-  
+
 - name: 1. Update apt cache
   apt:
     update_cache: yes
@@ -17,28 +17,38 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: 4. Deploy Nginx configuration
+- name: 4. Set dynamic IP addresses for backend and frontend
+  set_fact:
+    backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
+    frontend_ip: "{{ hostvars[groups['tag_Name_frontend'][0]].ansible_host }}"
+
+- name: 5. Debug backend IP
+  debug:
+    msg: "Backend IP is {{ backend_ip }}"
+
+- name: 6. Debug frontend IP
+  debug:
+    msg: "Frontend IP is {{ frontend_ip }}"
+
+- name: 7. Deploy Nginx configuration
   template:
-    src: "/home/ubuntu/internship_project/ansible_project/roles/frontend/templates/class_schedule.j2"
+    src: "{{ playbook_dir }}/roles/frontend/templates/class_schedule.j2"
     dest: /etc/nginx/sites-available/class_schedule
 
-- name: 5. Create symbolic link to enable site
+- name: 8. Create symbolic link to enable site
   file:
     src: /etc/nginx/sites-available/class_schedule
     dest: /etc/nginx/sites-enabled/class_schedule
     state: link
+  notify: Restart Nginx
 
-- name: 6. Restart Nginx service
-  service:
-    name: nginx
-    state: restarted
-
-- name: 7. Copy files to frontend directory
+- name: 9. Copy files to frontend directory
   copy:
-    src: "/home/ubuntu/internship/frontend/"
+    src: "/home/ubuntu/internship/frontend/build"
     dest: /var/www/frontend/
 
-- name: 8. Add file .env
+- name: 10. Add file .env
   template:
-      src: "/home/ubuntu/internship/ansible_project/roles/frontend/templates/.env.j2"
-      dest: /var/www/frontend/.env
+    src: "{{ playbook_dir }}/roles/frontend/templates/.env.j2"
+    dest: /var/www/frontend/.env
+  notify: Restart Nginx

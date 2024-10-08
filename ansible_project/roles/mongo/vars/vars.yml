@@ -1,2 +1,7 @@
 ---
 mongodb_version: "6.0"
+mongo_database: schedules
+mongo_admin_user: admin
+mongo_admin_password: admin_password
+mongo_admin_database: admin
+mongo_admin_role: userAdminAnyDatabase

@@ -1,11 +1,14 @@
 ---
 postgres_user: "postgres"
-postgres_database: "my_database"
+postgres_database: "mydatabase"
+postgres_password: "password"
 postgres_port: 5432
-postgres_host: "{{ hostvars['tag_Name_databases'].ansible_host }}"
-postgresql_password: "password"
 
 mongo_initdb_database: "schedules"
 redis_port: 6379
 
-backend_ip: "{{ hostvars['tag_Name_backend'].ansible_host }}"
+SPRING_PROFILES_ACTIVE: prod
+DATABASE_URL: jdbc:postgresql://"{{ hostvars['tag_Name_databases'].ansible_host }}":5432/mydatabase
+
+postgres_host: "{{ hostvars[groups['tag_Name_databases'][0]].ansible_host }}"
+backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
