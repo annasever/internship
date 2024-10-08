@@ -15,7 +15,7 @@ pipeline {
 
         stage('Run Ansible Playbook with Vault') {
             steps {
-                dir('ansible-project') {
+                dir('ansible_project') {
                     withCredentials([string(credentialsId: 'vault_password', variable: 'VAULT_PASS')]) {
                         sh '''
                             ansible-playbook playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")
@@ -27,7 +27,7 @@ pipeline {
 
         stage('Extract Backend URL') {
             steps {
-                dir('ansible-project') {
+                dir('ansible_project') {
                     script {
                         def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a 'msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}'", returnStdout: true).trim()
                         echo "Backend IP: ${backendIp}"
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Update Frontend .env Configuration') {
             steps {
-                dir('ansible-project') {
+                dir('ansible_project') {
                     script {
                         def backendIp = readFile('backend_ip.txt').trim()
                         sh """
@@ -52,7 +52,7 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                dir('ansible-project') {
+                dir('ansible_project') {
                     script {
                         sh " ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")"
                     }
