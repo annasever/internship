@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/SCRUM-7.TF_Ansible_Jenkins']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkins-git-user', url: 'git@github.com:annasever/internship.git']])
+                checkout scmGit(branches: [[name: '*/SCRUM-7.TF_Ansible_Jenkins']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkins-git', url: 'git@github.com:annasever/internship.git']])
             }
         }
 
