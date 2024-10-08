@@ -6,7 +6,7 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
     }
 
-     stages {
+    stages {
         stage('Checkout') {
             steps {
                 checkout scmGit(branches: [[name: '*/SCRUM-7.TF_Ansible_Jenkins']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkins-git-user', url: 'git@github.com:annasever/internship.git']])
@@ -15,39 +15,47 @@ pipeline {
 
         stage('Run Ansible Playbook with Vault') {
             steps {
-                withCredentials([string(credentialsId: 'vault_password', variable: 'VAULT_PASS')]) {
-                    sh '''
-                        echo "$VAULT_PASS" | ansible-playbook playbook.yml -i aws_ec2.yml --ask-vault-pass
-                    '''
+                dir('ansible-project') {
+                    withCredentials([string(credentialsId: 'vault_password', variable: 'VAULT_PASS')]) {
+                        sh '''
+                            ansible-playbook playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")
+                        '''
+                    }
                 }
             }
         }
 
         stage('Extract Backend URL') {
             steps {
-                script {
-                    def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a 'msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}'", returnStdout: true).trim()
-                    echo "Backend IP: ${backendIp}"
-                    writeFile file: 'backend_ip.txt', text: backendIp
+                dir('ansible-project') {
+                    script {
+                        def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a 'msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}'", returnStdout: true).trim()
+                        echo "Backend IP: ${backendIp}"
+                        writeFile file: 'backend_ip.txt', text: backendIp
+                    }
                 }
             }
         }
 
         stage('Update Frontend .env Configuration') {
             steps {
-                script {
-                    def backendIp = readFile('backend_ip.txt').trim()
-                    sh """
-                        sed -i 's|^REACT_APP_API_BASE_URL=.*|REACT_APP_API_BASE_URL="http://${backendIp}:8080"|' /var/www/frontend/.env
-                    """
+                dir('ansible-project') {
+                    script {
+                        def backendIp = readFile('backend_ip.txt').trim()
+                        sh """
+                            sed -i 's|^REACT_APP_API_BASE_URL=.*|REACT_APP_API_BASE_URL="http://${backendIp}:8080"|' /var/www/frontend/.env
+                        """
+                    }
                 }
             }
         }
 
         stage('Deploy Frontend') {
             steps {
-                script {
-                    sh "ansible-playbook -i aws_ec2.yml playbooks/frontend.yml"
+                dir('ansible-project') {
+                    script {
+                        sh " ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file <(echo "$VAULT_PASS")"
+                    }
                 }
             }
         }
