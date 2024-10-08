@@ -31,8 +31,11 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     script {
-                        def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a 'msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}' --vault-password-file vault_password.txt", returnStdout: true).trim()
+                        def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a \"msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}\" tag_Name_backend --vault-password-file vault_password.txt", returnStdout: true).trim()
                         echo "Backend IP: ${backendIp}"
+
+                        backendIp = backendIp.replaceAll(/.*\|\s+SUCCESS\s+=>\s+\{.*"msg":\s+"([^"]+)".*/, '$1')
+                        echo "Parsed Backend IP: ${backendIp}"
                         writeFile file: 'backend_ip.txt', text: backendIp
                     }
                 }
