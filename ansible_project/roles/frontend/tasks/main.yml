@@ -42,10 +42,13 @@
     state: link
   notify: Restart Nginx
 
+
+
 - name: 9. Copy files to frontend directory
   copy:
     src: "/home/ubuntu/internship/frontend/build"
     dest: /var/www/frontend/
+    remote_src: no
 
 - name: 10. Add file .env
   template:
