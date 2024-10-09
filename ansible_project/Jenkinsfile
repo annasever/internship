@@ -60,7 +60,6 @@ pipeline {
                 dir('frontend') {
                     script {
                         def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
-                        echo "Read Backend IP from file: ${backendIp}"
 
                         sh """
                             export REACT_APP_API_BASE_URL="http://3.68.91.81:8080"
