@@ -33,7 +33,7 @@
 - name: 4. Create AWS credentials file
   template:
     src: credentials.j2
-    dest: ~/.aws/credentials
+    dest: /home/ubuntu/.aws/credentials
     owner: ubuntu
     mode: '0600'
 
