@@ -42,34 +42,49 @@ pipeline {
             }
         }
 
-        // stage('Update Frontend .env Configuration') {
-        //     steps {
-        //         dir('ansible_project') {
-        //             script {
-        //                 def backendIp = readFile('backend_ip.txt').trim()
-        //                 sh """
-        //                     echo 'REACT_APP_API_BASE_URL="http://${backendIp}:8080"' | sudo tee /var/www/frontend/.env > /dev/null
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
 
-        // stage('Deploy Frontend') {
-        //     steps {
-        //         dir('ansible_project') {
-        //             script {
-        //                 sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
-        //             }
-        //         }
-        //     }
-        // }
+        // NPM and Frontend Build Steps
+        stage('Frontend - Install NPM and Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    args '-p 3000:3000'
+                }
+            }
+            environment {
+                CI = 'true'
+            }
+        
+        steps {
+                dir('frontend') {
+                    script {
+                        def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
+                        sh """
+                            export REACT_APP_API_BASE_URL="http://${backendIp}:8080"
+                            npm install
+                            npm run build
+                        """
+                    }
+                }
+            }
+        }
+
+
+        stage('Deploy Frontend') {
+            steps {
+                dir('ansible_project') {
+                    script {
+                        sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
+                    }
+                }
+            }
+        }
     }
 
 
     post {
         success {
-            echo 'Ansible playbook executed successfully, and frontend is updated with backend IP in .env file.'
+            echo 'Ansible playbook executed successfully, and frontend is updated with backend IP.'
         }
         failure {
             echo 'Ansible playbook execution failed.'

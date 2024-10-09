@@ -13,6 +13,11 @@ resource "aws_instance" "backend" {
   tags = {
     Name = "backend"
   }
+
+   root_block_device {
+    volume_size = 15
+  }
+
 }
 
 resource "aws_instance" "frontend" {
@@ -24,6 +29,11 @@ resource "aws_instance" "frontend" {
   tags = {
     Name = "frontend"
   }
+
+   root_block_device {
+    volume_size = 15
+  }
+
 }
 
 resource "aws_instance" "databases" {
@@ -35,8 +45,11 @@ resource "aws_instance" "databases" {
   tags = {
     Name = "databases"
   }
-}
 
+   root_block_device {
+    volume_size = 20 
+  }
+}
 
 resource "null_resource" "install_backend_dependencies" {
   depends_on = [aws_instance.backend]

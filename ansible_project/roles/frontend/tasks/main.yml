@@ -60,8 +60,7 @@
   copy:
     src: "/home/ubuntu/internship/frontend/build/"
     dest: /var/www/frontend/
-    remote_src: no
-  when: not build_dir.stat.exists
+    remote_src: yes
 
 - name: 12. Add file .env
   template:

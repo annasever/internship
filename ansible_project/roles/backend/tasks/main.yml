@@ -1,7 +1,7 @@
 ---
 - name: Include vars.yml
   include_vars: vars/vars.yml
-  
+
 - name: 1. Update apt cache
   apt:
     update_cache: yes
@@ -23,38 +23,20 @@
     owner: tomcat
     group: tomcat
 
-- name: 5. Ensure that Tomcat is started
-  service:
-    name: tomcat9
-    state: started
-    enabled: true
+# - name: 5. Remove existing ROOT directory
+#   file:
+#     path: /var/lib/tomcat9/webapps/ROOT
+#     state: absent
 
-- name: 6. Copy WAR file to Tomcat
-  copy:
-    src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
-    dest: /var/lib/tomcat9/webapps/
-    group: tomcat
-    mode: '0644'
-  notify: Restart Tomcat
-
-- name: 7. Copy .env file to Tomcat
+- name: 6. Copy .env file to Tomcat
   copy:
     src: "{{ playbook_dir }}/roles/backend/templates/.env.j2"
     dest: /var/lib/tomcat9/.env
     owner: tomcat
     group: tomcat
     mode: '0644'
-  notify: Restart Tomcat
 
-- name: 8. Generate .env file using template
-  template:
-    src: "roles/backend/templates/.env.j2"
-    dest: /var/lib/tomcat9/.env
-    owner: tomcat
-    group: tomcat
-    mode: '0644'
-
-- name: 9. Create script to load environment variables
+- name: 7. Create script to load environment variables
   copy:
     content: |
       #!/bin/bash
@@ -66,11 +48,33 @@
     group: tomcat
     mode: '0755'
 
-- name: 10. Ensure setenv.sh is executable and used by Tomcat
+- name: 8. Ensure setenv.sh is executable and used by Tomcat
   file:
     path: /usr/share/tomcat9/bin/setenv.sh
     state: file
     owner: tomcat
     group: tomcat
     mode: '0755'
-  notify: Restart Tomcat 
+
+# - name: 9. Copy WAR file to Tomcat
+#   copy:
+#     src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
+#     dest: /var/lib/tomcat9/webapps/
+#     group: tomcat
+#     mode: '0644'
+#   notify: Restart Tomcat
+
+- name: 10. Ensure that Tomcat is started
+  service:
+    name: tomcat9
+    state: started
+    enabled: true
+
+- name: 11. Generate .env file using template
+  template:
+    src: "roles/backend/templates/.env.j2"
+    dest: /var/lib/tomcat9/.env
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+  notify: Restart Tomcat
