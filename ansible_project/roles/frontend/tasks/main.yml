@@ -44,6 +44,7 @@
 
 - name: 9. Download frontend build artifacts from S3
   command: aws s3 cp s3://class-schedule-bucket/ /var/www/frontend/ --recursive
+  ignore_errors: true
 
 - name: 10. Set permissions for frontend build directory
   file:
