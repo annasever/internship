@@ -7,8 +7,6 @@ pipeline {
         ANSIBLE_SSH_PRIVATE_KEY_FILE = credentials('private-key') 
         PATH = "/usr/local/bin:/usr/bin:/path/to/awscli:$PATH"
         BUILD_DIR = "/opt/jenkins/workspace/ansible_project/frontend/build"
-}
-
     }
 
     tools {
@@ -42,7 +40,7 @@ pipeline {
                         def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a \"msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}\" tag_Name_backend --vault-password-file vault_password.txt", returnStdout: true).trim()
                         echo "Backend IP: ${backendIp}"
 
-                        backendIp =  backendIp.replaceAll(/.*"msg":\s+"([^"]+)".*/, '$1')
+                        backendIp = backendIp.replaceAll(/.*"msg":\s+"([^"]+)".*/, '$1')
                         echo "Parsed Backend IP: ${backendIp}"
                         writeFile file: 'backend_ip.txt', text: backendIp
                     }
@@ -68,7 +66,7 @@ pipeline {
             }
         }
 
-         stage('Upload to S3') {
+        stage('Upload to S3') {
             steps {
                 script {
                     sh '''
@@ -82,7 +80,6 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     script {
-
                         sh '''
                             ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
                         '''
@@ -100,3 +97,4 @@ pipeline {
             echo 'Ansible playbook execution failed.'
         }
     }
+}
