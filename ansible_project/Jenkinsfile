@@ -65,13 +65,22 @@ pipeline {
             }
         }
 
+         stage('Upload to S3') {
+            steps {
+                dir('frontend/build') {
+                    script {
+                        sh '''
+                            aws s3 cp . s3://class-schedule-bucket/ --recursive
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Deploy Frontend') {
             steps {
                 dir('ansible_project') {
                     script {
-                        sh """
-                            ansible -i aws_ec2.yml frontend -m copy -a "src=../frontend/build/ dest=/var/www/frontend/ owner=www-data group=www-data mode=0755"
-                        """
 
                         sh '''
                             ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
