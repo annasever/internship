@@ -86,3 +86,4 @@
     dest: /var/www/frontend/.env
   notify: Restart Nginx
 
+
