@@ -72,7 +72,9 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     script {
-                        sh "ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt"
+                        sh '''
+                            ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
+                        '''
                     }
                 }
             }
