@@ -8,6 +8,10 @@ pipeline {
         PATH = "/usr/local/bin:/usr/bin:$PATH" 
     }
 
+    tools {
+        nodejs 'NodeJS_14'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -43,26 +47,18 @@ pipeline {
             }
         }
 
-
         // NPM and Frontend Build Steps
         stage('Frontend - Install NPM and Build') {
-            agent {
-                docker {
-                    image 'node:14'
-                    args '-p 3000:3000'
-                }
-            }
-            environment {
-                CI = 'true'
-            }
-        
-        steps {
+            steps {
                 dir('frontend') {
                     script {
                         def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
 
-                        sh """
-                            export REACT_APP_API_BASE_URL="http://3.68.91.81:8080"
+
+                        env.REACT_APP_API_BASE_URL = "http://3.68.91.81:8080"
+
+
+                         sh """
                             npm install
                             npm run build
                         """
