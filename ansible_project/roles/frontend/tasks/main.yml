@@ -42,20 +42,23 @@
     state: link
   notify: Restart Nginx
 
-- name: 9. Set permissions for frontend build directory
+- name: 9. Download frontend build artifacts from S3
+  command: aws s3 cp s3://class-schedule-bucket/ /var/www/frontend/ --recursive
+
+- name: 10. Set permissions for frontend build directory
   file:
-    path: /home/ubuntu/internship/frontend/build
+    path: /var/www/frontend
     owner: ubuntu
     group: ubuntu
     mode: '0755'
     state: directory
 
-- name: 10. Check if the frontend build directory exists
+- name: 11. Check if the frontend build directory exists
   stat:
-    path: /var/www/frontend/build
+    path: /var/www/frontend
   register: build_dir
 
-- name: 11. Add file .env
+- name: 12. Add file .env
   template:
     src: "{{ playbook_dir }}/roles/frontend/templates/.env.j2"
     dest: /var/www/frontend/.env
