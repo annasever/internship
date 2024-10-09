@@ -55,8 +55,7 @@ pipeline {
                         def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
                         echo "${backendIp}"
 
-
-                         sh """
+                        sh """
                             export REACT_APP_API_BASE_URL="http://${backendIp}:8080"
                             npm install
                             npm run build
@@ -66,23 +65,22 @@ pipeline {
             }
         }
 
+        stage('Deploy Frontend') {
+            steps {
+                dir('ansible_project') {
+                    script {
+                        sh """
+                            ansible -i aws_ec2.yml frontend -m copy -a "src=../frontend/build/ dest=/var/www/frontend/ owner=www-data group=www-data mode=0755"
+                        """
 
-stage('Deploy Frontend') {
-    steps {
-        dir('ansible_project') {
-            script {
-                sh """
-                    ansible -i aws_ec2.yml frontend -m copy -a "src=../frontend/build/ dest=/var/www/frontend/ owner=www-data group=www-data mode=0755"
-                """
-
-                sh '''
-                    ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
-                '''
+                        sh '''
+                            ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
+                        '''
+                    }
+                }
             }
         }
     }
-}
-
 
     post {
         success {
@@ -92,5 +90,4 @@ stage('Deploy Frontend') {
             echo 'Ansible playbook execution failed.'
         }
     }
-}
 }
