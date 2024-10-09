@@ -53,12 +53,14 @@ pipeline {
                 dir('frontend') {
                     script {
                         def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
+                        echo "${backendIp}"
 
 
-                        env.REACT_APP_API_BASE_URL = "http://3.68.91.81:8080"
+                        // env.REACT_APP_API_BASE_URL = "http://3.68.91.81:8080"
 
 
                          sh """
+                            export REACT_APP_API_BASE_URL="http://${backendIp}:8080"
                             npm install
                             npm run build
                         """
