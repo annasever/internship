@@ -1,8 +1,4 @@
 ---
-#REACT_APP_API_BASE_URL: "http://{{ hostvars['tag_Name_backend'].ansible_host }}:8080"
-#backend_ip: 3.70.25.132
-#frontend_ip: 3.70.189.94
-
 postgres_user: "postgres"
 postgres_database: "my_database"
 postgres_port: 5432

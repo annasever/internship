@@ -1,68 +1,86 @@
 ---
 - name: Include vars.yml
   include_vars: vars/vars.yml
+  vars_files:
+    - aws_creds.yml 
+
+- name: Include AWS credentials
+  include_vars:
+    file: aws_creds.yml
 
 - name: 1. Update apt cache
   apt:
     update_cache: yes
 
-- name: 2. Install Nginx
+- name: 2. Install Nginx and AWS CLI
   apt:
-    name: nginx
+    name: 
+      - nginx
+      - awscli
     state: present
     update_cache: yes
 
-- name: 3. Remove default nginx configuration
+- name: 3. Create AWS credentials directory
+  file:
+    path: ~/.aws
+    state: directory
+    mode: '0700'
+
+- name: 4. Create AWS credentials file
+  template:
+    src: credentials.j2
+    dest: ~/.aws/credentials
+    owner: ubuntu
+    mode: '0600'
+
+- name: 5. Remove default nginx configuration
   file:
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- name: 4. Set dynamic IP addresses for backend and frontend
+- name: 6. Set dynamic IP addresses for backend and frontend
   set_fact:
     backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
     frontend_ip: "{{ hostvars[groups['tag_Name_frontend'][0]].ansible_host }}"
 
-- name: 5. Debug backend IP
+- name: 7. Debug backend IP
   debug:
     msg: "Backend IP is {{ backend_ip }}"
 
-- name: 6. Debug frontend IP
+- name: 8. Debug frontend IP
   debug:
     msg: "Frontend IP is {{ frontend_ip }}"
 
-- name: 7. Deploy Nginx configuration
+- name: 9. Deploy Nginx configuration
   template:
     src: "{{ playbook_dir }}/roles/frontend/templates/class_schedule.j2"
     dest: /etc/nginx/sites-available/class_schedule
 
-- name: 8. Create symbolic link to enable site
+- name: 10. Create symbolic link to enable site
   file:
     src: /etc/nginx/sites-available/class_schedule
     dest: /etc/nginx/sites-enabled/class_schedule
     state: link
   notify: Restart Nginx
 
-- name: 9. Set permissions for frontend build directory
+- name: 11. Download frontend build artifacts from S3
+  command: aws s3 cp s3://class-schedule-bucket/ /var/www/frontend/ --recursive
+  ignore_errors: true
+
+- name: 12. Set permissions for frontend build directory
   file:
-    path: /home/ubuntu/internship/frontend/build
+    path: /var/www/frontend
     owner: ubuntu
     group: ubuntu
     mode: '0755'
     state: directory
 
-
-- name: 10. Check if the frontend build directory exists
+- name: 13. Check if the frontend build directory exists
   stat:
-    path: /var/www/frontend/build
+    path: /var/www/frontend
   register: build_dir
 
-- name: 11. Copy files to frontend directory
-  copy:
-    src: "/home/ubuntu/internship/frontend/build/"
-    dest: /var/www/frontend/
-    remote_src: yes
-
-- name: 12. Add file .env
+- name: 14. Add file .env
   template:
     src: "{{ playbook_dir }}/roles/frontend/templates/.env.j2"
     dest: /var/www/frontend/.env
