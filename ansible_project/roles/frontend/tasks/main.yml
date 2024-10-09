@@ -89,5 +89,3 @@
     src: "{{ playbook_dir }}/roles/frontend/templates/.env.j2"
     dest: /var/www/frontend/.env
   notify: Restart Nginx
-
-  
