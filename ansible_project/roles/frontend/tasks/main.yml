@@ -50,19 +50,12 @@
     mode: '0755'
     state: directory
 
-
 - name: 10. Check if the frontend build directory exists
   stat:
     path: /var/www/frontend/build
   register: build_dir
 
-- name: 11. Copy files to frontend directory
-  copy:
-    src: "/home/ubuntu/internship/frontend/build/"
-    dest: /var/www/frontend/
-    remote_src: yes
-
-- name: 12. Add file .env
+- name: 11. Add file .env
   template:
     src: "{{ playbook_dir }}/roles/frontend/templates/.env.j2"
     dest: /var/www/frontend/.env
