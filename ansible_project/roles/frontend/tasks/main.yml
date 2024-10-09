@@ -4,7 +4,7 @@
 
 - name: Include AWS credentials
   include_vars:
-    file: /home/ubuntu/internship/ansible_project/aws_creds.yml
+    file: "{{ playbook_dir }}/aws_creds.yml" 
     name: aws_creds
 
 - name: Set AWS credentials
