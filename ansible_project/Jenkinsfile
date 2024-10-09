@@ -70,19 +70,10 @@ pipeline {
 
          stage('Upload to S3') {
             steps {
-<<<<<<< HEAD
                 script {
                     sh '''
                          aws s3 cp ${BUILD_DIR} s3://class-schedule-bucket/ --recursive
                     '''
-=======
-                dir('frontend/build') {
-                    script {
-                        sh '''
-                            aws s3 cp . s3://class-schedule-bucket/ --recursive
-                        '''
-                    }
->>>>>>> 5610449d67c4adc7dd0d588618e677d0cad4f3e9
                 }
             }
         }
@@ -109,7 +100,3 @@ pipeline {
             echo 'Ansible playbook execution failed.'
         }
     }
-<<<<<<< HEAD
-=======
-}
->>>>>>> 5610449d67c4adc7dd0d588618e677d0cad4f3e9
