@@ -56,9 +56,6 @@ pipeline {
                         echo "${backendIp}"
 
 
-                        // env.REACT_APP_API_BASE_URL = "http://3.68.91.81:8080"
-
-
                          sh """
                             export REACT_APP_API_BASE_URL="http://${backendIp}:8080"
                             npm install
@@ -70,18 +67,21 @@ pipeline {
         }
 
 
-        stage('Deploy Frontend') {
-            steps {
-                dir('ansible_project') {
-                    script {
-                        sh '''
-                            ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
-                        '''
-                    }
-                }
+stage('Deploy Frontend') {
+    steps {
+        dir('ansible_project') {
+            script {
+                sh """
+                    ansible -i aws_ec2.yml frontend -m copy -a "src=../frontend/build/ dest=/var/www/frontend/ owner=www-data group=www-data mode=0755"
+                """
+
+                sh '''
+                    ansible-playbook frontend-playbook.yml -i aws_ec2.yml --vault-password-file vault_password.txt --private-key="$ANSIBLE_SSH_PRIVATE_KEY_FILE"
+                '''
             }
         }
     }
+}
 
 
     post {
