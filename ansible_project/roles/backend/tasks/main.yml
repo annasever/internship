@@ -6,12 +6,12 @@
   apt:
     update_cache: yes
 
-- name: 2. Install Java JDK 11
+- name: 2. Install Java JDK11
   apt:
     name: openjdk-11-jdk
     state: present
 
-- name: 3. Install Tomcat 9
+- name: 3. Install Tomcat9
   apt:
     name: tomcat9
     state: present
@@ -22,6 +22,7 @@
     state: directory
     owner: tomcat
     group: tomcat
+    mode: '0755'
 
 - name: 5. Remove existing ROOT directory
   file:
@@ -36,27 +37,7 @@
     group: tomcat
     mode: '0644'
 
-- name: 7. Create script to load environment variables
-  copy:
-    content: |
-      #!/bin/bash
-      set -a
-      source /var/lib/tomcat9/.env
-      set +a
-    dest: /usr/share/tomcat9/bin/setenv.sh
-    owner: tomcat
-    group: tomcat
-    mode: '0755'
-
-- name: 8. Ensure setenv.sh is executable and used by Tomcat
-  file:
-    path: /usr/share/tomcat9/bin/setenv.sh
-    state: file
-    owner: tomcat
-    group: tomcat
-    mode: '0755'
-
-- name: 9. Copy WAR file to Tomcat
+- name: 7. Copy WAR file to Tomcat
   copy:
      src: "{{ playbook_dir }}/roles/backend/files/ROOT.war"
      dest: /var/lib/tomcat9/webapps/
@@ -65,11 +46,27 @@
      mode: '0644'
   notify: Restart Tomcat
 
-- name: Include properties tasks
-  include_tasks: properties.yml
+- name: 8. Create directory for unpacked WAR
+  file:
+    path: /var/lib/tomcat9/webapps/ROOT/
+    state: directory
+    owner: tomcat
+    group: tomcat
+    mode: '0755' 
 
-- name: 10. Ensure that Tomcat is started
+- name: 9. Unpack WAR file to Tomcat
+  unarchive:
+    src: /var/lib/tomcat9/webapps/ROOT.war
+    dest: /var/lib/tomcat9/webapps/ROOT/
+    remote_src: yes 
+  notify: Restart Tomcat
+
+- name: 10. Include properties tasks
+  include_tasks: properties.yml
+  
+- name: 11. Ensure that Tomcat is started
   service:
     name: tomcat9
     state: started
     enabled: true
+  notify: Restart Tomcat
