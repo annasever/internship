@@ -12,3 +12,5 @@ MONGO_INITDB_DATABASE: schedules
 
 SPRING_PROFILES_ACTIVE: prod
 DATABASE_URL: jdbc:postgresql://"{{ hostvars['tag_Name_databases'].ansible_host }}":5432/mydatabase
+backend_ip: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
+REACT_APP_API_BASE_URL: http://"{{ hostvars['tag_Name_backend'].ansible_host }}":8080

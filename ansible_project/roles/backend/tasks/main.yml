@@ -28,13 +28,13 @@
     path: /var/lib/tomcat9/webapps/ROOT
     state: absent
 
-# - name: 6. Copy .env file to Tomcat
-#   copy:
-#     src: "{{ playbook_dir }}/roles/backend/templates/.env.j2"
-#     dest: /var/lib/tomcat9/.env
-#     owner: tomcat
-#     group: tomcat
-#     mode: '0644'
+- name: 6. Copy .env file to Tomcat
+  copy:
+    src: "{{ playbook_dir }}/roles/backend/templates/.env.j2"
+    dest: /var/lib/tomcat9/.env
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
 
 - name: 7. Create script to load environment variables
   copy:
