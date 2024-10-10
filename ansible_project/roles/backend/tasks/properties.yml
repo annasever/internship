@@ -1,0 +1,32 @@
+---
+- include_vars: vars.yml
+
+- name: 1. Update hibernate.properties - URL
+  lineinfile:
+    path: /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/hibernate.properties
+    regexp: '^(hibernate.connection.url=jdbc:postgresql\:\/\/)[^:]+(:[0-9]+\/[a-zA-Z0-9_]+)$'
+    line: "hibernate.connection.url=jdbc:postgresql://{{ POSTGRES_HOST }}:{{ POSTGRES_PORT }}/{{ POSTGRES_DB }}"
+
+- name: 2. Replace username in hibernate.properties
+  lineinfile:
+    path: /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/hibernate.properties
+    regexp: "^(hibernate.connection.username=).+$"
+    line: "hibernate.connection.username={{ POSTGRES_USER }}"
+
+- name: 3. Replace password in hibernate.properties
+  lineinfile:
+    path: /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/hibernate.properties
+    regexp: "^(hibernate.connection.password=).+$"
+    line: "hibernate.connection.password={{ POSTGRES_PASSWORD }}"
+
+- name: 4. Replace redis.address in cache.properties
+  lineinfile:
+    path: /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/cache.properties
+    regexp: '^redis\.address\s*=\s*.*$'
+    line: "redis.address=redis://{{ REDIS_HOST }}:{{ REDIS_PORT }}"
+
+- name: 5. Update mongo.properties
+  lineinfile:
+    path: /var/lib/tomcat9/webapps/ROOT/WEB-INF/classes/mongo.properties
+    regexp: '^mongo\.local\.current\.database\s*=\s*.*$'
+    line: "mongo.local.current.database={{ MONGO_INITDB_DATABASE }}"
