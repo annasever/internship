@@ -7,7 +7,6 @@
     regexp: '^(hibernate.connection.url=jdbc:postgresql\:\/\/)[^:]+(:[0-9]+\/[a-zA-Z0-9_]+)$'
     line: "hibernate.connection.url=jdbc:postgresql://{{ POSTGRES_HOST }}:{{ POSTGRES_PORT }}/{{ POSTGRES_DB }}"
   become: true
-  become_user: tomcat
 
 - name: 2. Replace username in hibernate.properties
   lineinfile:
@@ -15,7 +14,6 @@
     regexp: "^(hibernate.connection.username=).+$"
     line: "hibernate.connection.username={{ POSTGRES_USER }}"
   become: true
-  become_user: tomcat
 
 - name: 3. Replace password in hibernate.properties
   lineinfile:
@@ -23,7 +21,6 @@
     regexp: "^(hibernate.connection.password=).+$"
     line: "hibernate.connection.password={{ POSTGRES_PASSWORD }}"
   become: true
-  become_user: tomcat
 
 - name: 4. Replace redis.address in cache.properties
   lineinfile:
@@ -31,7 +28,6 @@
     regexp: '^redis\.address\s*=\s*.*$'
     line: "redis.address=redis://{{ REDIS_HOST }}:{{ REDIS_PORT }}"
   become: true
-  become_user: tomcat
 
 - name: 5. Update mongo.properties
   lineinfile:
@@ -39,4 +35,3 @@
     regexp: '^mongo\.local\.current\.database\s*=\s*.*$'
     line: "mongo.local.current.database={{ MONGO_INITDB_DATABASE }}"
   become: true
-  become_user: tomcat
