@@ -12,7 +12,7 @@ __postgresql_packages:
 db_backup_filename: "2024-08-19.dump"
 postgresql_user: "postgres"
 postgresql_group: "postgres"
-postgresql_password: "password" # Consider using Ansible Vault for sensitive data
+postgresql_password: "password"
 postgresql_data_dir1: "/var/lib/postgresql/data"
 postgresql_effective_log_dir: "/var/log/postgresql"
 postgresql_daemon: "postgresql"
