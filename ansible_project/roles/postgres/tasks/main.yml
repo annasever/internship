@@ -51,7 +51,6 @@
   when: not pgdata_dir_version.stat.exists
   become: true
   become_user: "{{ postgresql_user }}"
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
   vars:
     ansible_ssh_pipelining: true
 
@@ -98,7 +97,7 @@
     state: "{{ postgresql_service_state }}"
     enabled: "{{ postgresql_service_enabled }}"
 
-- name: 5. Set permissions on PostgreSQL data directory
+- name: Set permissions on PostgreSQL data directory
   ansible.builtin.file:
     path: "{{ postgresql_data_dir1 }}"
     owner: "{{ postgresql_user }}"
@@ -131,7 +130,6 @@
   with_items: "{{ postgresql_databases }}"
   become: true
   become_user: "{{ postgresql_user }}"
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
   vars:
     ansible_ssh_pipelining: true
 
@@ -152,7 +150,6 @@
   with_items: "{{ postgresql_users }}"
   become: true
   become_user: "{{ postgresql_user }}"
-  # See: https://github.com/ansible/ansible/issues/16048#issuecomment-229012509
   vars:
     ansible_ssh_pipelining: true
   environment:
@@ -174,7 +171,7 @@
     host: localhost
     port: 5432
     state: started
-    delay: 10  # Adjust delay to give PostgreSQL time to start fully
+    delay: 10 
   become: true
 
 # - name: Ensure PostgreSQL users are configured correctly.

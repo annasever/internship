@@ -37,7 +37,7 @@ pipeline {
             steps {
                 dir('ansible_project') {
                     script {
-                        def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a \"msg={{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}\" tag_Name_backend --vault-password-file vault_password.txt", returnStdout: true).trim()
+                        def backendIp = sh(script: "ansible -i aws_ec2.yml -m debug -a \"var=ansible_host\" tag_Name_backend --vault-password-file vault_password.txt", returnStdout: true).trim()
                         echo "Backend IP: ${backendIp}"
 
                         backendIp = backendIp.replaceAll(/.*"msg":\s+"([^"]+)".*/, '$1')
@@ -56,11 +56,13 @@ pipeline {
                         def backendIp = readFile('../ansible_project/backend_ip.txt').trim()
                         echo "${backendIp}"
 
+
                         sh """
                             export REACT_APP_API_BASE_URL="http://${backendIp}:8080"
                             npm install
                             npm run build
                         """
+                        echo "${REACT_APP_API_BASE_URL="http://${backendIp}:8080"}"
                     }
                 }
             }
