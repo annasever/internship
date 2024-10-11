@@ -70,3 +70,7 @@
     state: started
     enabled: true
   notify: Restart Tomcat
+
+- name: Set API base URL
+  set_fact:
+    REACT_APP_API_BASE_URL: "http://{{ backend_ip }}:8080"
