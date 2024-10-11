@@ -9,13 +9,13 @@
     update_cache: yes
 
 - name: 2. Add Grafana GPG key
-  ansible.builtin.command: |
+  ansible.builtin.shell: |
     wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | tee /etc/apt/keyrings/grafana.gpg > /dev/null
   args:
     creates: /etc/apt/keyrings/grafana.gpg
 
 - name: 3. Add Grafana repository
-  ansible.builtin.command: |
+  ansible.builtin.shell: |
     echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | tee /etc/apt/sources.list.d/grafana.list
   args:
     creates: /etc/apt/sources.list.d/grafana.list
