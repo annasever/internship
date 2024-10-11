@@ -11,3 +11,10 @@
 /terraform_project/.terraform/
 /terraform_project/*.tfvars
 /terraform_project/terraform.tfvars
+
+/prometheus/terraform_prometheus/*.tfstate
+/prometheus/terraform_prometheus/*.tfstate.*
+/prometheus/terraform_prometheus/.terraform/
+/prometheus/terraform_prometheus/*.tfvars
+/prometheus/terraform_prometheus/terraform.tfvars
+
