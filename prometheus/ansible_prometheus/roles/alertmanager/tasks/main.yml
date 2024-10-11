@@ -1,0 +1,77 @@
+---
+- name: 1. Update APT package cache
+  apt:
+    update_cache: yes
+
+- name: 2. Creating alertmanager user group
+  group: name="{{groupId}}"
+  become: true
+
+- name: 3. Creating alertmanager user
+  user:
+    name: "{{userId}}"
+    group: "{{groupId}}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{userId}} nologin User"
+    createhome: "no"
+    state: present
+
+- name: 4. Download alertmanager
+  unarchive:
+    src: "https://github.com/prometheus/alertmanager/releases/download/v{{ version }}/alertmanager-{{ version }}.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+
+- name: 5. Copy alertmanager executable to bin
+  copy:
+    src: "/tmp/alertmanager-{{ version }}.linux-amd64/alertmanager"
+    dest: "/usr/local/bin/alertmanager"
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    remote_src: yes
+    mode: 0755
+
+- name: 6. Delete alertmanager tmp folder
+  file:
+    path: '/tmp/alertmanager-{{ version }}.linux-amd64'
+    state: absent
+
+- name: 7. Creates data directory
+  file: 
+    path: "/data/alertmanager/"
+    state: directory
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0755
+
+- name: 8. Creates config directory
+  file: 
+    path: "/etc/alertmanager/"
+    state: directory
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0755
+
+- name: 9. Copy config file
+  copy:
+    src: "{{ role_path }}/files/alertmanager.yml"
+    dest: /etc/alertmanager/alertmanager.yml
+
+- name: 10. Copy systemd init file
+  template:
+    src: init.service.j2
+    dest: /etc/systemd/system/alertmanager.service
+  notify: Reload systemd
+
+- name: 11. Start alertmanager service
+  service:
+    name: alertmanager
+    state: started
+    enabled: yes
+
+- name: 12. Check if alertmanager is accessible
+  uri:
+    url: http://{{ alertmanager_ip }}:9093
+    method: GET
+    status_code: 200

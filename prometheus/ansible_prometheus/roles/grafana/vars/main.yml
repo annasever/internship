@@ -1,0 +1,1 @@
+grafana_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"

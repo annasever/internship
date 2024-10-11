@@ -1,0 +1,49 @@
+---
+- name: 1. Install dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+    state: present
+    update_cache: yes
+
+- name: 2. Add Grafana GPG key
+  ansible.builtin.command: |
+    wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | tee /etc/apt/keyrings/grafana.gpg > /dev/null
+  args:
+    creates: /etc/apt/keyrings/grafana.gpg
+
+- name: 3. Add Grafana repository
+  ansible.builtin.command: |
+    echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | tee /etc/apt/sources.list.d/grafana.list
+  args:
+    creates: /etc/apt/sources.list.d/grafana.list
+
+- name: 4. Update APT cache
+  apt:
+    update_cache: yes
+
+- name: 5. Install Grafana
+  apt:
+    name: grafana
+    state: present
+
+- name: 6. Copy Grafana configuration file
+  template:
+    src: grafana.conf.j2
+    dest: /etc/grafana/grafana.ini
+    notify: Restart Grafana
+
+- name: 7. Start and enable Grafana service
+  service:
+    name: grafana-server
+    enabled: true
+    state: started
+
+- name: 8. Check if Grafana is accessible
+  uri:
+    url: http://{{ grafana_ip }}:3000
+    method: GET
+    status_code: 200
+  notify: Restart Grafana

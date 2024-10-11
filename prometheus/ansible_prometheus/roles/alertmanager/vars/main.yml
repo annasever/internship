@@ -1,0 +1,7 @@
+---
+serviceName: "alertmanager"
+userId: "alertmanager"
+groupId: "alertmanager"
+exec_command: "/usr/local/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/data/alertmanager"
+version: "0.27.0"
+alertmanager_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"

@@ -1,0 +1,9 @@
+---
+serviceName: "prometheus"
+userId: "prometheus"
+groupId: "prometheus"
+exec_command: "/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.conf --storage.tsdb.path=/data/prometheus --storage.tsdb.retention=2d"
+version: "2.51.2"
+prometheus_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
+node_exporter_host: "{{ hostvars[groups['tag_Name_backend'][0]].ansible_host }}"
+alertmanager_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
