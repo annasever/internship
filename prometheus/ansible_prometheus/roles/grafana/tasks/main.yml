@@ -33,17 +33,9 @@
   template:
     src: grafana.conf.j2
     dest: /etc/grafana/grafana.ini
-    notify: Restart Grafana
 
 - name: 7. Start and enable Grafana service
   service:
     name: grafana-server
     enabled: true
     state: started
-
-- name: 8. Check if Grafana is accessible
-  uri:
-    url: http://{{ grafana_ip }}:3000
-    method: GET
-    status_code: 200
-  notify: Restart Grafana

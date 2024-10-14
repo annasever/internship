@@ -63,29 +63,35 @@
   loop: "{{ groups['node_exporter'] }}"
   when: item is defined
 
-- name: 10. Add config file
+- name: 10. Remove existing prometheus.conf.j2 if it exists
+  file:
+    path: /etc/prometheus/prometheus.conf
+    state: absent
+
+- name: 11. Add config file
   template:
     src: prometheus.conf.j2
     dest: /etc/prometheus/prometheus.conf
 
-- name: 11. Add alert config file
+- name: 12. Add alert config file
   copy:
     src: "{{ role_path }}/files/alertrules.yml"
     dest: /etc/prometheus/alert.rules.yml
 
-- name: 12. Copy systemd init file
+- name: 13. Copy systemd init file
   template:
     src: init.service.j2
     dest: /etc/systemd/system/prometheus.service
-  notify: Reload systemd
+  notify: Restart the Prometheus service
 
-- name: 13. Start prometheus service
+- name: 14. Start prometheus service
   service:
     name: prometheus
     state: started
     enabled: yes
+  notify: Restart the Prometheus service
 
-- name: 14. Check if prometheus is accessible
+- name: 15. Check if prometheus is accessible
   uri:
     url: http://{{ prometheus_ip }}:9090
     method: GET
