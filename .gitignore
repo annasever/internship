@@ -11,3 +11,6 @@
 /terraform_project/.terraform/
 /terraform_project/*.tfvars
 /terraform_project/terraform.tfvars
+
+
+
