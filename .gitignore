@@ -21,3 +21,4 @@ terraform.tfvars
 *.tfstate
 .tfstate.
 **/*.tfvars
+/prometheus/terraform_prometheus/terraform.tfvars
