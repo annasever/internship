@@ -35,7 +35,7 @@
 ;http_addr =
 
 # The http port  to use
-;http_port = 3000
+http_port = 3000
 
 # The public facing domain name used to access grafana from a browser
 ;domain = localhost
@@ -148,10 +148,10 @@ log_queries =
 #################################### Security ####################################
 [security]
 # default admin user, created on startup
-;admin_user = admin
+admin_user = admin
 
 # default admin password, can be changed before first start of grafana,  or in profile settings
-;admin_password = admin
+admin_password = admin
 
 # used for signing
 ;secret_key = SW2YcwTIb9zpOOhoPsMm
@@ -184,7 +184,7 @@ log_queries =
 [dashboards]
 # Number dashboard versions to keep (per dashboard). Default: 20, Minimum: 1
 ;versions_to_keep = 20
-
+provisioning_path = /var/lib/grafana/dashboards
 #################################### Users ###############################
 [users]
 # disable user signup / registration
@@ -226,7 +226,7 @@ log_queries =
 #################################### Anonymous Auth ##########################
 [auth.anonymous]
 # enable anonymous access
-;enabled = false
+enabled = true
 
 # specify organization name that should be used for unauthenticated users
 ;org_name = Main Org.
@@ -460,3 +460,7 @@ log_queries =
 
 [external_image_storage.local]
 # does not require any configuration
+
+[dashboards.json]
+enabled = true
+path = /var/lib/grafana/dashboards

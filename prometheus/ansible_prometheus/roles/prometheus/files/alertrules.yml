@@ -9,3 +9,39 @@ groups:
         annotations:
           summary: "Endpoint {{ $labels.instance }} down"
           description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
+
+      - alert: HighCpuLoad
+        expr: avg(rate(cpu_usage_seconds_total[5m])) by (instance) > 0.8
+        for: 5m
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High CPU load on {{ $labels.instance }}"
+          description: "CPU load is above 80% on instance {{ $labels.instance }} for more than 5 minutes."
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 1h
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Less than 10% disk space available on {{ $labels.instance }}."
+
+      - alert: NodeExporterDown
+        expr: absent(node_exporter_up)
+        for: 1m
+        labels:
+          severity: "critical"
+        annotations:
+          summary: "Node Exporter is down on {{ $labels.instance }}"
+          description: "Node Exporter for {{ $labels.instance }} is not reporting metrics."
+
+      - alert: HighMemoryUsage
+        expr: (sum(container_memory_usage_bytes{container!="",container!="POD"}) by (instance) / sum(container_memory_limit_bytes{container!="",container!="POD"}) by (instance)) > 0.8
+        for: 5m
+        labels:
+          severity: "warning"
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 80% on instance {{ $labels.instance }} for more than 5 minutes."

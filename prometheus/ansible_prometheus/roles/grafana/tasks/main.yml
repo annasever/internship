@@ -39,3 +39,185 @@
     name: grafana-server
     enabled: true
     state: started
+
+- name: 8. Ensure grafana key directory exists
+  ansible.builtin.file:
+    path: "{{ grafana_api_keys_dir }}/{{ inventory_hostname }}"
+    state: directory
+    mode: "0755"
+  become: false
+  delegate_to: localhost
+
+- name: 9. Check existing API key list
+  ansible.builtin.uri:
+    url: "{{ grafana_api_url }}/api/auth/keys"
+    user: "{{ grafana_admin_user }}"
+    password: "{{ grafana_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+  register: __existing_api_keys
+  no_log: true
+  ignore_errors: yes
+
+- name: 10. Set existing API keys
+  set_fact:
+    existing_api_keys: "{{ __existing_api_keys.json | default([]) }}"
+  when: __existing_api_keys is defined and __existing_api_keys.status == 200
+
+- name: 11. Create Grafana API key
+  ansible.builtin.uri:
+    url: "{{ grafana_api_url }}/api/auth/keys"
+    user: "{{ grafana_admin_user }}"
+    password: "{{ grafana_admin_password }}"
+    force_basic_auth: true
+    method: POST
+    body_format: json
+    body:
+      name: "{{ grafana_api_key_name }}"
+      role: "{{ grafana_api_role }}"
+      secondsToLive: 86400
+  register: new_api_key
+  when:
+    - existing_api_keys is defined
+    - existing_api_keys | selectattr('name', 'equalto', grafana_api_key_name) | list | length == 0
+
+
+- name: 12. Create API key file
+  ansible.builtin.copy:
+    dest: "{{ grafana_api_keys_dir }}/{{ inventory_hostname }}/{{ grafana_api_key_name }}.key"
+    content: "{{ new_api_key['json']['key'] }}"
+    mode: "0644"
+  when: new_api_key is defined and new_api_key['json'] is defined
+
+- name: 13. Copy Grafana dashboard JSON files to remote server
+  ansible.builtin.copy:
+    src: "files/{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: '0644'
+  loop:
+    - backend_dashboard.json
+    - frontend_dashboard.json
+    - mongodb_dashboard.json
+    - postgresql_dashboard.json
+    - redis_dashboard.json
+  register: copy_dashboard_files
+
+- name: 14. Check if prometheus datasource exists
+  uri:
+    url: "http://{{ grafana_ip }}:{{ grafana_port }}/api/datasources/name/Prometheus"
+    user: "{{ grafana_admin_user }}"
+    password: "{{ grafana_admin_password }}"
+    force_basic_auth: yes
+  register: grafana_prometheus
+  failed_when: false
+  changed_when: false
+  when: grafana_prometehus
+
+- name: 15. Configure Prometheus Datasource
+  uri:
+    url: "http://{{ grafana_ip }}:{{ grafana_port }}/api/datasources"
+    method: POST
+    user: "{{ grafana_admin_user }}"
+    password: "{{ grafana_admin_password }}"
+    body:
+      name: "Prometheus"
+      type: "prometheus"
+      url: "http://{{ prometheus_ip }}:9090"
+      access: "proxy"
+      isDefault: true
+    force_basic_auth: yes
+    status_code: 200
+    body_format: json
+  when: grafana_prometehus and grafana_prometheus.status == 404
+
+# - name: 16. Configure AlertManager Datasource
+#   uri:
+#     url: "http://{{ grafana_ip }}:{{ grafana_port }}/api/datasources"
+#     method: POST
+#     user: "{{ grafana_admin_user }}"
+#     password: "{{ grafana_admin_password }}"
+#     body:
+#       name: "AlertManager"
+#       type: "prometheus"
+#       url: "http://{{ alertmanager_ip }}:9093"
+#       access: "proxy"
+#     force_basic_auth: yes
+#     body_format: json
+#     status_code: 200
+#   ignore_errors: true
+
+- name: 16. Ensure Grafana dashboard directory exists
+  file:
+    path: "{{ grafana_dir_dashboards }}"
+    state: directory
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+    mode: 0755
+
+- name: 17. Copy dashboards from file dir to {{ grafana_dir_dashboards }}
+  copy:
+    src: "{{ item }}"
+    dest: "{{ grafana_dir_dashboards }}/{{ item }}"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+    mode: 0755
+  with_items:
+    - backend_dashboard.json
+    - frontend_dashboard.json
+    - mongodb_dashboard.json
+    - postgresql_dashboard.json
+    - redis_dashboard.json
+  when: grafana_prometehus
+  notify: Restart Grafana
+
+- name: 18. Create Grafana provisioning dashboard configuration
+  copy:
+    dest: /etc/grafana/provisioning/dashboards/dashboard.yaml
+    content: |
+      apiVersion: 1
+
+      providers:
+        - name: 'local dashboards'
+          type: file
+          disableDeletion: false
+          allowUiUpdates: true
+          options:
+            path: {{ grafana_dir_dashboards }}
+    mode: '0644'
+  notify: Restart Grafana
+
+- name: 19. Create dashboard folder in Grafana
+  uri:
+    url: "{{ grafana_api_url }}/api/folders"
+    method: POST
+    user: "{{ grafana_admin_user }}"
+    password: "{{ grafana_admin_password }}"
+    force_basic_auth: yes
+    body:
+      title: "Dashboards"
+    body_format: json
+    status_code: 200
+  register: create_folder
+  failed_when: create_folder.status not in [200, 409] 
+
+- name: 20. Import Grafana dashboards
+  community.grafana.grafana_dashboard:
+    grafana_url: "{{ grafana_url }}"
+    grafana_api_key: "{{ grafana_api_key }}"
+    state: present
+    commit_message: Updated by ansible
+    overwrite: yes
+    path: "{{ item }}"
+    folder: "Dashboards"  
+  loop:
+    - /tmp/backend_dashboard.json
+    - /tmp/frontend_dashboard.json
+    - /tmp/mongodb_dashboard.json
+    - /tmp/postgresql_dashboard.json
+    - /tmp/redis_dashboard.json
+  when: grafana_prometheus.status == 200
+
+- name: 21. Restart Grafana
+  service:
+    name: grafana-server
+    state: restarted

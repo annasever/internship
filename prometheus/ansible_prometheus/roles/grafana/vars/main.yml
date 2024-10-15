@@ -1,1 +1,18 @@
 grafana_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
+prometheus_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
+alertmanager_ip: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
+
+grafana_host: "{{ hostvars[groups['tag_Name_prometheus'][0]].ansible_host }}"
+grafana_port: 3000
+grafana_dashboards:
+  prometheus: true
+  node_exporter: true
+
+grafana_url: "http://{{ grafana_ip }}:{{ grafana_port }}"
+grafana_api_url: "{{ grafana_url }}"
+grafana_admin_user: admin
+grafana_admin_password: admin
+grafana_api_keys_dir: "/etc/grafana/"
+grafana_api_key_name: "My_Key"
+grafana_api_role: "Admin"
+api_key_name: "My_Key"

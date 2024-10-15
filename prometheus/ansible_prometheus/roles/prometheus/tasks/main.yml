@@ -76,24 +76,22 @@
 - name: 12. Add alert config file
   copy:
     src: "{{ role_path }}/files/alertrules.yml"
-    dest: /etc/prometheus/alert.rules.yml
+    dest: /etc/prometheus/alertrules.yml
 
-- name: 13. Copy systemd init file
+- name: 13. Copy alertmanager configuration file
+  copy:
+    src: "{{ role_path }}/files/alertmanager.yml"
+    dest: /etc/prometheus/alertmanager.yml
+
+- name: 14. Copy systemd init file
   template:
     src: init.service.j2
     dest: /etc/systemd/system/prometheus.service
   notify: Restart the Prometheus service
 
-- name: 14. Start prometheus service
+- name: 15. Start prometheus service
   service:
     name: prometheus
     state: started
     enabled: yes
-  notify: Restart the Prometheus service
-
-- name: 15. Check if prometheus is accessible
-  uri:
-    url: http://{{ prometheus_ip }}:9090
-    method: GET
-    status_code: 200
   notify: Restart the Prometheus service
