@@ -23,3 +23,8 @@ terraform.tfvars
 **/*.tfvars
 /prometheus/terraform_prometheus/terraform.tfvars
 
+/docker-tf/*.tfstate
+/docker-tf/*.tfstate.*
+/docker-tf/.terraform/
+/docker-tf/*.tfvars
+/docker-tf/terraform.tfvars
