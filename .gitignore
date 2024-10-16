@@ -28,3 +28,5 @@ terraform.tfvars
 /docker-tf/.terraform/
 /docker-tf/*.tfvars
 /docker-tf/terraform.tfvars
+/docker-tf/*/.terraform/
+
