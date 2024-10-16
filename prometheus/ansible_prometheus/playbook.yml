@@ -23,6 +23,7 @@
   remote_user: ubuntu
   roles:
     - node_exporter
+    - nginx_exporter
 
 - hosts: tag_Name_prometheus
   become: true

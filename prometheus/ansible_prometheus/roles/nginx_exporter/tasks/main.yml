@@ -1,0 +1,25 @@
+---
+- name: 1. Download Nginx Exporter
+  ansible.builtin.get_url:
+    url: https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.3.0/nginx-prometheus-exporter_1.3.0_linux_amd64.tar.gz
+    dest: /tmp/nginx-prometheus-exporter.tar.gz
+    mode: '0755'
+
+- name: 2. Extract Nginx Exporter
+  ansible.builtin.unarchive:
+    src: /tmp/nginx-prometheus-exporter.tar.gz
+    dest: /usr/local/bin/
+    remote_src: yes
+
+- name: 3. Copy Nginx Exporter systemd service file
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/nginx_exporter.service"
+    dest: /etc/systemd/system/nginx_exporter.service
+    mode: '0644'
+  notify: restart nginx_exporter
+
+- name: 4. Enable and start Nginx Exporter service
+  ansible.builtin.systemd:
+    name: nginx_exporter
+    enabled: yes
+    state: started

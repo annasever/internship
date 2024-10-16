@@ -1,0 +1,6 @@
+---
+- hosts: tag_Name_prometheus
+  become: true
+  remote_user: ubuntu
+  roles:
+    - prometheus

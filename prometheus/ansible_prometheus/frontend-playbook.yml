@@ -1,0 +1,7 @@
+---
+- hosts: tag_Name_frontend
+  become: true
+  remote_user: ubuntu
+  roles:
+    - node_exporter
+    - nginx_exporter

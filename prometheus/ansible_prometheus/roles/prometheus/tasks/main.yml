@@ -95,3 +95,8 @@
     state: started
     enabled: yes
   notify: Restart the Prometheus service
+
+- name: 16. Restart the Prometheus service
+  service:
+    name: prometheus
+    state: restarted

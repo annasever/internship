@@ -95,11 +95,11 @@
     dest: "/tmp/{{ item }}"
     mode: '0644'
   loop:
-    - backend_dashboard.json
-    - frontend_dashboard.json
-    - mongodb_dashboard.json
-    - postgresql_dashboard.json
-    - redis_dashboard.json
+    - node_exporter_full.json
+    # - frontend_dashboard.json
+    # - mongodb_dashboard.json
+    # - postgresql_dashboard.json
+    # - redis_dashboard.json
   register: copy_dashboard_files
 
 - name: 14. Check if prometheus datasource exists
@@ -130,22 +130,6 @@
     body_format: json
   when: grafana_prometehus and grafana_prometheus.status == 404
 
-# - name: 16. Configure AlertManager Datasource
-#   uri:
-#     url: "http://{{ grafana_ip }}:{{ grafana_port }}/api/datasources"
-#     method: POST
-#     user: "{{ grafana_admin_user }}"
-#     password: "{{ grafana_admin_password }}"
-#     body:
-#       name: "AlertManager"
-#       type: "prometheus"
-#       url: "http://{{ alertmanager_ip }}:9093"
-#       access: "proxy"
-#     force_basic_auth: yes
-#     body_format: json
-#     status_code: 200
-#   ignore_errors: true
-
 - name: 16. Ensure Grafana dashboard directory exists
   file:
     path: "{{ grafana_dir_dashboards }}"
@@ -162,11 +146,11 @@
     group: "{{ grafana_group }}"
     mode: 0755
   with_items:
-    - backend_dashboard.json
-    - frontend_dashboard.json
-    - mongodb_dashboard.json
-    - postgresql_dashboard.json
-    - redis_dashboard.json
+    - node_exporter_full.json
+    # - frontend_dashboard.json
+    # - mongodb_dashboard.json
+    # - postgresql_dashboard.json
+    # - redis_dashboard.json
   when: grafana_prometehus
   notify: Restart Grafana
 
@@ -210,11 +194,11 @@
     path: "{{ item }}"
     folder: "Dashboards"  
   loop:
-    - /tmp/backend_dashboard.json
-    - /tmp/frontend_dashboard.json
-    - /tmp/mongodb_dashboard.json
-    - /tmp/postgresql_dashboard.json
-    - /tmp/redis_dashboard.json
+    - /tmp/node_exporter_full.json
+    # - /tmp/frontend_dashboard.json
+    # - /tmp/mongodb_dashboard.json
+    # - /tmp/postgresql_dashboard.json
+    # - /tmp/redis_dashboard.json
   when: grafana_prometheus.status == 200
 
 - name: 21. Restart Grafana
