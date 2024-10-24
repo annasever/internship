@@ -17,3 +17,10 @@ spec:
         image: annasever/class_schedule-frontend:latest
         ports:
         - containerPort: 3000
+        env:
+        - name: REACT_APP_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_API_BASE_URL
+

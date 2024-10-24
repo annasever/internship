@@ -17,3 +17,45 @@ spec:
         image: annasever/class_schedule-backend:latest
         ports:
         - containerPort: 8080
+        env:
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: POSTGRES_DB
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: POSTGRES_PORT
+          - name: POSTGRES_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: POSTGRES_HOST
+          - name: MONGO_INITDB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: MONGO_INITDB_DATABASE
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: REDIS_PORT
+          - name: REACT_APP_API_BASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: REACT_APP_API_BASE_URL
+
