@@ -33,35 +33,3 @@ spec:
             configMapKeyRef:
               name: postgres-config
               key: POSTGRES_PASSWORD
-      initContainers:
-      - name: init-db
-        image: postgres:latest
-        env:
-        - name: POSTGRES_DB
-          valueFrom:
-            configMapKeyRef:
-              name: postgres-config
-              key: POSTGRES_DB
-        - name: POSTGRES_USER
-          valueFrom:
-            configMapKeyRef:
-              name: postgres-config
-              key: POSTGRES_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            configMapKeyRef:
-              name: postgres-config
-              key: POSTGRES_PASSWORD
-        command:
-        - /bin/sh
-        - -c
-        - |
-          psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" &&
-          psql -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f /tmp/my.dump
-        volumeMounts:
-        - name: dump-volume
-          mountPath: /tmp
-      volumes:
-      - name: dump-volume
-        configMap:
-          name: dump-config

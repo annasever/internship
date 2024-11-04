@@ -8,11 +8,3 @@ data:
   POSTGRES_PASSWORD: "password"
   POSTGRES_PORT: "5432"
   POSTGRES_HOST: "postgres"
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dump-config
-data:
-  my.dump: |
