@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: {{ .Values.postgres.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nc -z {{ .Values.config.postgres.host }} {{ .Values.config.postgres.port }}; do echo waiting for postgres; sleep 2; done']
+      containers:
+      - name: backend
+        image: {{ .Values.backend.image }}
+        ports:
+        - containerPort:  {{ .Values.backend.containerPort }}
+        env:
+          - name: POSTGRES_DB
+            value: "{{ .Values.config.postgres.db }}"
+          - name: POSTGRES_USER
+            value: "{{ .Values.config.postgres.user }}"
+          - name: POSTGRES_PASSWORD
+            value: "{{ .Values.config.postgres.password }}"
+          - name: POSTGRES_PORT
+            value: "{{ .Values.config.postgres.port }}"
+          - name: POSTGRES_HOST
+            value: "{{ .Values.config.postgres.host }}"
+          - name: MONGO_INITDB_DATABASE
+            value: "{{ .Values.config.mongo.database }}"
+          - name: REDIS_PORT
+            value: "{{ .Values.config.redis.port }}"

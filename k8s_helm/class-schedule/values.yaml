@@ -1,0 +1,82 @@
+replicaCount: 1
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+backend:
+  image: "annasever/class_schedule-backend:latest"
+  containerPort: 8080
+  servicePort: 80
+
+frontend:
+  image: "annasever/class_schedule-frontend:latest"
+  containerPort: 3000
+  servicePort: 80
+
+mongo:
+  image: "mongo:latest"
+  containerPort: 27017
+
+postgres:
+  image: "postgres:latest"
+  containerPort: 5432
+  host: "postgres"
+  port: 5432
+  env:
+    POSTGRES_DB: "database"
+    POSTGRES_USER: "user"
+    POSTGRES_PASSWORD: "password" 
+
+redis:
+  image: "redis:latest"
+  containerPort: 6379
+
+services:
+  backend:
+    type: LoadBalancer
+    port: 8080
+    targetPort: 8080
+  frontend:
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+  mongo:
+    type: ClusterIP
+    port: 27017
+    targetPort: 27017
+  postgres:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  redis:
+    type: ClusterIP
+    port: 6379
+    targetPort: 6379
+
+config:
+  frontend:
+    apiBaseUrl: "http://af40d71048cfa4a7ca59d46b36d11b30-1023632629.eu-central-1.elb.amazonaws.com:8080/"
+  postgres:
+    db: "database"
+    user: "user"
+    password: "password"
+    port: "5432"
+    host: "postgres"
+  mongo:
+    database: "schedules"
+  redis:
+    port: "6379"
